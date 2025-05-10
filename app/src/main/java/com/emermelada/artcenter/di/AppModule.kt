@@ -5,6 +5,7 @@ import com.emermelada.artcenter.data.repositories.AuthRepository
 import com.emermelada.artcenter.data.repositories.CategoriesRepository
 import com.emermelada.artcenter.data.repositories.PreferencesRepository
 import com.emermelada.artcenter.data.repositories.SubcategoriesRepository
+import com.emermelada.artcenter.data.repositories.UserRepository
 import com.emermelada.artcenter.data.repositories.dataStore
 import dagger.Module
 import dagger.Provides
@@ -41,5 +42,11 @@ object AppModule {
     @Singleton
     fun provideSubcategoriesRepository(): SubcategoriesRepository {
         return SubcategoriesRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(): UserRepository {
+        return UserRepository()
     }
 }
