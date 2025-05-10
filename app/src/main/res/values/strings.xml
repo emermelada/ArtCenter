@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ArtCenter</string>
+    <string name="TitleAuth">ARTCENTER</string>
+    <string name="cerrarSesion">Cerrar sesión.</string>
+</resources>
