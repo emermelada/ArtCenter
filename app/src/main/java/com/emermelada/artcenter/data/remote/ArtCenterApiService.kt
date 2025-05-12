@@ -19,8 +19,11 @@ interface ArtCenterApiService {
     @GET("user")
     fun getUserInfo(): Call<User>
 
-    @PUT("user")
-    fun updateUserInfo(@Body body: UserUpdateRequest): Call<ResponseBody>
+    @PUT("user/username")
+    fun updateUsername(@Body body: UserUpdateRequest): Call<ResponseBody>
+
+    @PUT("user/profile-picture")
+    fun updateProfilePicture(@Body body: UserUpdateRequest): Call<ResponseBody>
 
     // Métodos para categorias
     @POST("categorias")

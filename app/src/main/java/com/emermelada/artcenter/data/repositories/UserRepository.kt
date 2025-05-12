@@ -34,15 +34,37 @@ class UserRepository {
         }
     }
 
-    // Actualizar la información del usuario
-    suspend fun updateUserInfo(username: String?, urlFotoPerfil: String?): Result<Unit> {
-        val updateRequest = UserUpdateRequest(username, urlFotoPerfil)
+    // Actualizar solo el nombre de usuario
+    suspend fun updateUsername(username: String): Result<Unit> {
+        val updateRequest = UserUpdateRequest(username = username, urlFotoPerfil = null) // Solo nombre, foto null
         return withContext(Dispatchers.IO) {
-            val response = api.updateUserInfo(updateRequest).execute()
+            val response = api.updateUsername(updateRequest).execute()
             if (response.isSuccessful) {
                 Result(
                     data = null,
-                    msg = "Usuario actualizado correctamente",
+                    msg = "Nombre actualizado correctamente",
+                    code = response.code()
+                )
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = errorMsg,
+                    code = response.code()
+                )
+            }
+        }
+    }
+
+    // Actualizar solo la foto de perfil
+    suspend fun updateProfilePicture(urlFotoPerfil: String): Result<Unit> {
+        val updateRequest = UserUpdateRequest(username = null, urlFotoPerfil = urlFotoPerfil) // Solo foto, nombre null
+        return withContext(Dispatchers.IO) {
+            val response = api.updateProfilePicture(updateRequest).execute()
+            if (response.isSuccessful) {
+                Result(
+                    data = null,
+                    msg = "Foto de perfil actualizada correctamente",
                     code = response.code()
                 )
             } else {
