@@ -49,35 +49,43 @@ import com.emermelada.artcenter.ui.navigation.Destinations
 import androidx.compose.runtime.collectAsState
 
 
-
 @Composable
 fun MainScaffold(
     onClickSignOut: () -> Unit,
     viewModel: MainScaffoldViewModel = hiltViewModel()
-){
-
+) {
     val navController = rememberNavController()
+    val currentScreentitle = remember { mutableStateOf("ARTCENTER") }  // Título por defecto
     val currentScreen = remember { mutableStateOf(Destinations.FEED) }
     val userRole by viewModel.userRol.collectAsState()
 
-
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            currentScreentitle.value = when (destination.route) {
+                Destinations.FEED -> "ARTCENTER"
+                Destinations.PROFILE -> "PERFIL"
+                Destinations.CATEGORIES -> "CATEGORÍAS"
+                Destinations.CREATE_CATEGORIES -> "CREAR CATEGORÍA"
+                Destinations.CREATE_SUBCATEGORIES -> "CREAR SUBCATEGORÍA"
+                "${Destinations.SUBCATEGORIES}/{id}" -> "SUBCATEGORÍAS"
+                "${Destinations.SUBCATEGORY}/{idCategoria}/{idSubcategoria}" -> "SUBCATEGORÍA"
+                else -> "Pantalla Desconocida"
+            }
+
             currentScreen.value = destination.route ?: Destinations.FEED
         }
     }
 
     Scaffold(
         topBar = {
-            TopBarView (onClickSignOut)
+            TopBarView(onClickSignOut = onClickSignOut, currentScreentitle = currentScreentitle.value)
         },
         content = { innerPadding ->
             AppNavGraph(
                 navController,
                 innerPadding,
-                onClickNav = { destination ->
-                    navController.navigate(destination)
-                }
+                onClickNav = { destination -> navController.navigate(destination) },
+                onClickSignOut
             )
         },
         bottomBar = {
@@ -98,8 +106,75 @@ fun MainScaffold(
             }
         }
     )
-
 }
+
+
+@Composable
+fun TopBarView(onClickSignOut: () -> Unit, currentScreentitle: String) {
+    var menuExpanded by remember { mutableStateOf(false) }
+
+    val kuchekFont = FontFamily(Font(R.font.kuchek))
+
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFE0E0E0))  // Color suave para el fondo
+                .statusBarsPadding()  // Ajuste para que no se sobreponga con la barra de estado
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box {
+                    IconButton(
+                        onClick = { menuExpanded = !menuExpanded }
+                    ) {
+                        Icon(Icons.Default.Settings, contentDescription = "Ajustes", tint = Color.Black)
+                    }
+
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { stringResource(R.string.CerrarSesion) },
+                            onClick = {
+                                menuExpanded = false
+                                onClickSignOut()
+                            }
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Mostrar el nombre de la categoría, subcategoría, o cualquier pantalla
+                    Text(
+                        text = currentScreentitle,  // Usamos el nombre dinámico de la pantalla
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(
+                            fontFamily = kuchekFont,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                            color = colorResource(R.color.black)
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.size(40.dp))  // Equilibrio visual con el icono
+            }
+        }
+        Divider(
+            thickness = 2.dp,
+            color = Color.DarkGray
+        )
+    }
+}
+
 
 @Composable
 fun BottomBarAdminView(
@@ -121,7 +196,7 @@ fun BottomBarAdminView(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray)
+                .background(Color(0xFFE0E0E0))
                 .padding(vertical = 8.dp, horizontal = 16.dp)
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -174,7 +249,7 @@ fun BottomBarUserView(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray)
+                .background(Color(0xFFE0E0E0))
                 .padding(vertical = 8.dp, horizontal = 16.dp)
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -205,60 +280,6 @@ fun BottomBarUserView(
 }
 
 
-@Composable
-fun TopBarView(onClickSignOut: () -> Unit) {
-    var menuExpanded by remember { mutableStateOf(false) }
 
-    val kuchekFont = FontFamily(Font(R.font.kuchek))
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .statusBarsPadding()
-            .background(Color.LightGray)
-            .padding(horizontal = 8.dp, vertical = 4.dp), // MÁS PEQUEÑO
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box {
-            IconButton(
-                onClick = { menuExpanded = !menuExpanded }
-            ) {
-                Icon(Icons.Default.Settings, contentDescription = "Ajustes", tint = Color.Black)
-            }
-
-            DropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = { menuExpanded = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Cerrar sesión") },
-                    onClick = {
-                        menuExpanded = false
-                        onClickSignOut()
-                    }
-                )
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .weight(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = stringResource(R.string.TitleAuth),
-                textAlign = TextAlign.Center,
-                style = TextStyle(
-                    fontFamily = kuchekFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize, // MÁS PEQUEÑA
-                    color = colorResource(R.color.black)
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.size(40.dp)) // equilibrio visual con el icono
-    }
-}
 
 

@@ -102,7 +102,6 @@ fun LoginScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 40.dp)
                         .padding(top = 4.dp)
                 ) {
                     if (errorMessage.isNotEmpty()) {

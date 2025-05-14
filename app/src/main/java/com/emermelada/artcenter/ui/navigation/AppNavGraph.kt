@@ -21,7 +21,8 @@ import com.emermelada.artcenter.ui.screens.subcategories.SubcategoryScreen
 fun AppNavGraph(
     navController: NavHostController,
     innerPadding: PaddingValues,
-    onClickNav: (String) -> Unit
+    onClickNav: (String) -> Unit,
+    onClickSignOut: () -> Unit
 ) {
 
     Column(

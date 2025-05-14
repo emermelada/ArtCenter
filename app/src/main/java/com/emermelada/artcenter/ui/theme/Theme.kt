@@ -13,36 +13,47 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 
 
-val GrayBackground = Color(0xFFD9D9D9)
+// Definición de la paleta de colores inspirada en La noche estrellada de Van Gogh
+val DarkBlue = Color(0xFF1E2A47)  // Azul oscuro, inspirado en el cielo nocturno
+val MutedBlue = Color(0xFF335B72)  // Azul apagado, en referencia a los tonos del cielo
+val LightBlue = Color(0xFF4F7B8A)  // Azul suave, para los detalles de las estrellas
+val Yellow = Color(0xFFFFE600)  // Amarillo brillante, inspirado en las estrellas
+val LightGray = Color(0xFFB4C6C1)  // Gris claro, para los elementos de fondo más suaves
+
+// Colores de fondo y superficie
+val background = LightGray  // Fondo más claro inspirado en la calma del cielo nocturno
+val surface = MutedBlue
+val onPrimary = Color.White
+val onSecondary = Color.White
+val onBackground = Color.Black
+val onSurface = Color.DarkGray
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
-    background = GrayBackground
+    primary = DarkBlue,
+    secondary = Yellow,
+    background = background,
+    surface = surface,
+    onPrimary = onPrimary,
+    onSecondary = onSecondary,
+    onBackground = onBackground,
+    onSurface = onSurface
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-    background = GrayBackground
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = DarkBlue,
+    secondary = Yellow,
+    background = background,
+    surface = surface,
+    onPrimary = onPrimary,
+    onSecondary = onSecondary,
+    onBackground = onBackground,
+    onSurface = onSurface
 )
 
+// Función principal para aplicar el tema
 @Composable
 fun ArtCenterTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
