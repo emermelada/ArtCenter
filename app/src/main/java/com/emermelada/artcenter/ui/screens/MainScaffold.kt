@@ -108,7 +108,6 @@ fun MainScaffold(
     )
 }
 
-
 @Composable
 fun TopBarView(onClickSignOut: () -> Unit, currentScreentitle: String) {
     var menuExpanded by remember { mutableStateOf(false) }
@@ -138,7 +137,8 @@ fun TopBarView(onClickSignOut: () -> Unit, currentScreentitle: String) {
                         onDismissRequest = { menuExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { stringResource(R.string.CerrarSesion) },
+                            text = { Text("Cerrar sesión",
+                                color = Color.White) },
                             onClick = {
                                 menuExpanded = false
                                 onClickSignOut()
@@ -174,7 +174,6 @@ fun TopBarView(onClickSignOut: () -> Unit, currentScreentitle: String) {
         )
     }
 }
-
 
 @Composable
 fun BottomBarAdminView(
