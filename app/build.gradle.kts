@@ -92,6 +92,9 @@ dependencies {
     //Icons
     implementation("androidx.compose.material:material-icons-extended")
 
+    //Image
+    implementation ("com.google.accompanist:accompanist-coil:0.13.0")
+    implementation("io.coil-kt:coil-compose:2.2.2")
 }
 
 

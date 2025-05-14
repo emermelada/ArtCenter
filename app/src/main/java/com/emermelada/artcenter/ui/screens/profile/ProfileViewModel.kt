@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,14 +47,19 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    // Actualizar solo la foto de perfil
-    fun updateProfilePicture(urlFotoPerfil: String) {
+    fun updateProfilePicture(file: MultipartBody.Part) {
         viewModelScope.launch {
-            _updateState.value = UiState.Loading
-            val result = userRepository.updateProfilePicture(urlFotoPerfil)
+            // Iniciar la actualización del perfil
+            val result = userRepository.updateProfilePicture(file)
+
             if (result.data != null) {
-                _updateState.value = UiState.Success(result.msg)
+                // Recargar la información del usuario con la nueva foto de perfil
+                fetchUserInfo()  // Esto asegura que se actualice la URL de la foto
+
+                // Establecer el mensaje de éxito en el estado de actualización
+                _updateState.value = UiState.Success("Foto de perfil actualizada correctamente")
             } else {
+                // En caso de error, actualiza el estado de error en la UI
                 _updateState.value = UiState.Error(result.msg ?: "Error al actualizar la foto de perfil")
             }
         }

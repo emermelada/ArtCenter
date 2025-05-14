@@ -6,6 +6,7 @@ import com.emermelada.artcenter.data.model.result.Result
 import com.emermelada.artcenter.data.remote.RetroFitInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MultipartBody
 import org.json.JSONObject
 import javax.inject.Singleton
 
@@ -56,25 +57,25 @@ class UserRepository {
         }
     }
 
-    // Actualizar solo la foto de perfil
-    suspend fun updateProfilePicture(urlFotoPerfil: String): Result<Unit> {
-        val updateRequest = UserUpdateRequest(username = null, urlFotoPerfil = urlFotoPerfil) // Solo foto, nombre null
-        return withContext(Dispatchers.IO) {
-            val response = api.updateProfilePicture(updateRequest).execute()
-            if (response.isSuccessful) {
-                Result(
-                    data = null,
-                    msg = "Foto de perfil actualizada correctamente",
-                    code = response.code()
-                )
-            } else {
-                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}").optString("msg")
-                Result(
-                    data = null,
-                    msg = errorMsg,
-                    code = response.code()
-                )
-            }
+    suspend fun updateProfilePicture(file: MultipartBody.Part): Result<String> {
+        return try {
+            // Llamamos a la función suspendida de Retrofit que devuelve el objeto con el mensaje y la URL
+            val response = api.uploadProfilePicture(file)  // Ahora devuelve ProfilePictureResponse
+
+            // Si la solicitud es exitosa, retornamos el resultado
+            Result(
+                data = response.urlFotoPerfil,  // Devolvemos la URL de la imagen
+                msg = "Foto de perfil actualizada correctamente",
+                code = 200  // El código de éxito HTTP
+            )
+        } catch (e: Exception) {
+            // Si ocurre un error, capturamos la excepción
+            Result(
+                data = null,
+                msg = "Error al actualizar la foto: ${e.localizedMessage}",
+                code = 500
+            )
         }
     }
+
 }

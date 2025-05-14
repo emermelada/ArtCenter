@@ -21,7 +21,6 @@ object RetroFitInstance {
         .addInterceptor { chain ->
             val requestBuilder = chain.request().newBuilder()
             val token = SessionManager.bearerToken
-            println("🛡 Enviando token: $token") // <<<<< AQUÍ COMPROBAMOS EL TOKEN
             if (!token.isNullOrEmpty()) {
                 requestBuilder.addHeader("Authorization", "Bearer $token")
             }
