@@ -12,6 +12,7 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -42,6 +43,14 @@ interface ArtCenterApiService {
 
     @GET("categorias/{id}")
     fun getCategoryById(@Path("id") id: Int): Call<Category>
+
+    // Método para eliminar categoría por id
+    @DELETE("categorias/{id}")
+    fun deleteCategoryById(@Path("id") id: Int): Call<ResponseBody>
+
+    // Método para actualizar categoría por id
+    @PUT("categorias/{id}")
+    fun updateCategoryById(@Path("id") id: Int, @Body category: CategorySimple): Call<ResponseBody>
 
     // Métodos para Subcategorías
 

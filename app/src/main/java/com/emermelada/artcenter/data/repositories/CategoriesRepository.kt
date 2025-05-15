@@ -74,4 +74,46 @@ class CategoriesRepository {
             }
         }
     }
+
+    suspend fun deleteCategoryById(id: Int): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            val response = api.deleteCategoryById(id).execute()
+            if (response.isSuccessful) {
+                val msg = JSONObject(response.body()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = msg,
+                    code = response.code()
+                )
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = errorMsg,
+                    code = response.code()
+                )
+            }
+        }
+    }
+
+    suspend fun updateCategoryById(id: Int, categorySimple: CategorySimple): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            val response = api.updateCategoryById(id, categorySimple).execute()
+            if (response.isSuccessful) {
+                val msg = JSONObject(response.body()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = msg,
+                    code = response.code()
+                )
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = errorMsg,
+                    code = response.code()
+                )
+            }
+        }
+    }
 }

@@ -29,4 +29,17 @@ class CategoriesViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteCategory(id: Int) {
+        viewModelScope.launch {
+            _categoriesState.value = UiState.Loading
+            val result = categoriesRepository.deleteCategoryById(id)
+            if (result.code in listOf(200, 201)) {
+                // Tras borrar, recarga las categorías
+                fetchCategories()
+            } else {
+                _categoriesState.value = UiState.Error(result.msg ?: "Error al eliminar categoría")
+            }
+        }
+    }
 }

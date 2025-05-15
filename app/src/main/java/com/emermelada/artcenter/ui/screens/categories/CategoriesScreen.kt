@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.emermelada.artcenter.data.model.categories.CategorySimple
 import com.emermelada.artcenter.ui.UiState
+import com.emermelada.artcenter.ui.components.categories.DeleteDialog
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.LightBlue
@@ -37,7 +38,10 @@ fun CategoriesScreen(
 ) {
     val userRole by viewModel.userRol.collectAsState()
     val categoriesState by categoriesViewModel.categoriesState.collectAsState()
-    var selectedCategoryName by remember { mutableStateOf("Categorías") } // Guardamos el nombre de la categoría
+    var selectedCategoryName by remember { mutableStateOf("Categorías") }
+
+    // Estado para la categoría que queremos eliminar
+    var categoryToDelete by remember { mutableStateOf<CategorySimple?>(null) }
 
     LaunchedEffect(Unit) {
         categoriesViewModel.fetchCategories()
@@ -74,7 +78,6 @@ fun CategoriesScreen(
                     itemsIndexed(categorias) { index, category ->
                         var menuExpanded by remember { mutableStateOf(false) }
 
-                        // Contenedor para el botón de categoría y el icono
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Row(
                                 modifier = Modifier
@@ -82,12 +85,10 @@ fun CategoriesScreen(
                                     .padding(vertical = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Si es administrador, alineamos a la izquierda, sino al centro
                                 if (userRole == "admin") {
-                                    // Administrador: Icono a la derecha y texto a la izquierda
                                     Button(
                                         onClick = {
-                                            selectedCategoryName = category.nombre  // Actualiza el nombre de la categoría
+                                            selectedCategoryName = category.nombre
                                             navController.navigate("${Destinations.SUBCATEGORIES}/${category.id}")
                                         },
                                         modifier = Modifier
@@ -109,25 +110,22 @@ fun CategoriesScreen(
                                                 fontFamily = LoraFontFamily,
                                                 fontWeight = FontWeight.Bold
                                             )
-                                            // Icono de ajustes para administradores
                                             IconButton(
                                                 onClick = { menuExpanded = !menuExpanded },
-                                                modifier = Modifier
-                                                    .padding(start = 8.dp) // Asegura que el icono tenga margen
+                                                modifier = Modifier.padding(start = 8.dp)
                                             ) {
                                                 Icon(
-                                                    Icons.Default.Settings,
-                                                    contentDescription = "Ajustes",
-                                                    tint = Color.Black
+                                                    Icons.Default.Edit,
+                                                    contentDescription = "opcionesCategoria",
+                                                    tint = Color.White
                                                 )
                                             }
                                         }
                                     }
                                 } else {
-                                    // Usuario normal: texto centrado
                                     Button(
                                         onClick = {
-                                            selectedCategoryName = category.nombre  // Actualiza el nombre de la categoría
+                                            selectedCategoryName = category.nombre
                                             navController.navigate("${Destinations.SUBCATEGORIES}/${category.id}")
                                         },
                                         modifier = Modifier
@@ -143,8 +141,8 @@ fun CategoriesScreen(
                                             color = Color.White,
                                             fontFamily = LoraFontFamily,
                                             fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.fillMaxWidth(), // Centra el texto
-                                            textAlign = TextAlign.Center // Asegura que el texto esté centrado
+                                            modifier = Modifier.fillMaxWidth(),
+                                            textAlign = TextAlign.Center
                                         )
                                     }
                                 }
@@ -162,17 +160,17 @@ fun CategoriesScreen(
                                         onDismissRequest = { menuExpanded = false }
                                     ) {
                                         DropdownMenuItem(
-                                            text = { Text("Cerrar sesión", color = Color.White) },
+                                            text = { Text("Editar", color = Color.White) },
                                             onClick = {
                                                 menuExpanded = false
-                                                // Acción de cerrar sesión
+                                                // Acción de editar
                                             }
                                         )
                                         DropdownMenuItem(
                                             text = { Text("Eliminar", color = Color.White) },
                                             onClick = {
                                                 menuExpanded = false
-                                                // Acción de eliminar categoría
+                                                categoryToDelete = category
                                             }
                                         )
                                     }
@@ -184,7 +182,20 @@ fun CategoriesScreen(
             }
         }
 
-        // Admin section for category management
+        // Diálogo de confirmación, solo si categoryToDelete no es null
+        categoryToDelete?.let { category ->
+            DeleteDialog(
+                text = "¿Seguro que quieres eliminar la categoría ${category.nombre}?",
+                onConfirm = {
+                    categoriesViewModel.deleteCategory(category.id)
+                    categoryToDelete = null
+                },
+                onDismiss = {
+                    categoryToDelete = null
+                }
+            )
+        }
+
         if (userRole == "admin") {
             Spacer(modifier = Modifier.height(4.dp))
             Row(
