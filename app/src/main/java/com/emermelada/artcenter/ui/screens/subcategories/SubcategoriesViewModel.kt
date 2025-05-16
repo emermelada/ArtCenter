@@ -45,4 +45,18 @@ class SubcategoriesViewModel @Inject constructor(
             }
         }
     }
+
+    // Método para eliminar subcategoría
+    fun deleteSubcategory(idCategoria: Int, idSubcategoria: Int) {
+        viewModelScope.launch {
+            _subcategoriesState.value = UiState.Loading
+            val result = subcategoriesRepository.deleteSubcategory(idCategoria, idSubcategoria)
+            if (result.code in listOf(200, 201)) {
+                // Tras eliminar, recarga las subcategorías de la categoría
+                fetchSubcategories(idCategoria)
+            } else {
+                _subcategoriesState.value = UiState.Error(result.msg ?: "Error al eliminar subcategoría")
+            }
+        }
+    }
 }

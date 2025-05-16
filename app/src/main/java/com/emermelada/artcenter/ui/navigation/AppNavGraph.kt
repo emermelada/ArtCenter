@@ -44,8 +44,10 @@ fun AppNavGraph(
                 CreateCategoriesScreen(id, onClickNav)
             }
 
-            composable(Destinations.CREATE_SUBCATEGORIES) {
-                CreateSubcategoriesScreen(onClickNav)
+            composable("${Destinations.CREATE_SUBCATEGORIES}/{idCategoria}/{idSubcategoria}"){ backStackEntry ->
+                val categoriaId = backStackEntry.arguments?.getString("idCategoria")?.toIntOrNull() ?: 0
+                val subcategoriaId = backStackEntry.arguments?.getString("idSubcategoria")?.toIntOrNull() ?: 0
+                CreateSubcategoriesScreen(categoriaId, subcategoriaId, onClickNav)
             }
 
             composable("${Destinations.SUBCATEGORIES}/{id}"){ backStackEntry ->

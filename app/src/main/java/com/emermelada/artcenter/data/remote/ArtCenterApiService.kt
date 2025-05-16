@@ -64,4 +64,17 @@ interface ArtCenterApiService {
 
     @GET("subcategorias/{idCategoria}/{idSubcategoria}")
     fun getSubcategoryById(@Path("idCategoria") idCategoria: Int, @Path("idSubcategoria") idSubcategoria: Int): Call<Subcategory>
+
+    @DELETE("subcategorias/{idCategoria}/{idSubcategoria}")
+    fun deleteSubcategory(
+        @Path("idCategoria") idCategoria: Int,
+        @Path("idSubcategoria") idSubcategoria: Int
+    ): Call<ResponseBody>
+
+    @PUT("subcategorias/{idCategoria}/{idSubcategoria}")
+    fun updateSubcategory(
+        @Path("idCategoria") idCategoria: Int,
+        @Path("idSubcategoria") idSubcategoria: Int,
+        @Body subcategory: Subcategory
+    ): Call<ResponseBody>
 }

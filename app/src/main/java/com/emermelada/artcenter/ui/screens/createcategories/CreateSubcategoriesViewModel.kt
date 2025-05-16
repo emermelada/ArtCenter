@@ -19,12 +19,15 @@ class CreateSubcategoriesViewModel @Inject constructor(
     private val categoriesRepository: CategoriesRepository,
     private val subcategoriesRepository: SubcategoriesRepository
 ) : ViewModel() {
-    // Estado para la creación de subcategorías
     private val _subcategoryState = MutableStateFlow<UiState>(UiState.Loading)
     val subcategoryState: StateFlow<UiState> = _subcategoryState.asStateFlow()
 
     private val _categoriesState = MutableStateFlow<UiState>(UiState.Loading)
     val categoriesState: StateFlow<UiState> get() = _categoriesState
+
+    // Nuevo estado para cargar subcategoría para edición
+    private val _subcategoryLoadedState = MutableStateFlow<UiState>(UiState.Idle)
+    val subcategoryLoadedState: StateFlow<UiState> = _subcategoryLoadedState.asStateFlow()
 
     fun fetchCategories() {
         viewModelScope.launch {
@@ -49,7 +52,6 @@ class CreateSubcategoriesViewModel @Inject constructor(
         viewModelScope.launch {
             _subcategoryState.value = UiState.Loading
             try {
-                // Encontrar el ID de la categoría seleccionada
                 val categoriaId = (categoriesState.value as? UiState.Success<List<CategorySimple>>)
                     ?.data?.find { it.nombre == categoriaSeleccionada }?.id
                 if (categoriaId == null) {
@@ -58,7 +60,7 @@ class CreateSubcategoriesViewModel @Inject constructor(
                 }
 
                 val subcategoryRequest = SubcategoryRequest(
-                    id_categoria = categoriaId,  // Usar el id de la categoría seleccionada
+                    id_categoria = categoriaId,
                     nombre = nombre,
                     historia = descripcion,
                     caracteristicas = caracteristicas,
@@ -74,6 +76,62 @@ class CreateSubcategoriesViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _subcategoryState.value = UiState.Error("Error al crear la subcategoría")
+            }
+        }
+    }
+
+    // Nuevo método para cargar subcategoría por id para editar
+    fun loadSubcategory(idCategoria: Int, idSubcategoria: Int) {
+        viewModelScope.launch {
+            _subcategoryLoadedState.value = UiState.Loading
+            val result = subcategoriesRepository.getSubcategoryById(idCategoria, idSubcategoria)
+            if (result.data != null) {
+                _subcategoryLoadedState.value = UiState.Success(result.data)
+            } else {
+                _subcategoryLoadedState.value = UiState.Error(result.msg ?: "Error al cargar subcategoría")
+            }
+        }
+    }
+
+    // Nuevo método para actualizar subcategoría
+    fun updateSubcategory(
+        idCategoria: Int,
+        idSubcategoria: Int,
+        nombre: String,
+        descripcion: String,
+        caracteristicas: String,
+        requerimientos: String,
+        tutoriales: String,
+        categoriaSeleccionada: String
+    ) {
+        viewModelScope.launch {
+            _subcategoryState.value = UiState.Loading
+            try {
+                val categoriaId = (categoriesState.value as? UiState.Success<List<CategorySimple>>)
+                    ?.data?.find { it.nombre == categoriaSeleccionada }?.id
+                if (categoriaId == null) {
+                    _subcategoryState.value = UiState.Error("Categoría no encontrada.")
+                    return@launch
+                }
+
+                val subcategory = com.emermelada.artcenter.data.model.subcategories.Subcategory(
+                    id_categoria = categoriaId,
+                    id_subcategoria = idSubcategoria,
+                    nombre = nombre,
+                    historia = descripcion,
+                    caracteristicas = caracteristicas,
+                    requerimientos = requerimientos,
+                    tutoriales = tutoriales
+                )
+
+                val result = subcategoriesRepository.updateSubcategory(idCategoria, idSubcategoria, subcategory)
+                if (result.code in listOf(200, 201)) {
+                    _subcategoryState.value = UiState.Success("Subcategoría actualizada correctamente.")
+                } else {
+                    _subcategoryState.value = UiState.Error(result.msg ?: "Error al actualizar la subcategoría.")
+                }
+            } catch (e: Exception) {
+                _subcategoryState.value = UiState.Error("Error al actualizar la subcategoría")
             }
         }
     }

@@ -99,4 +99,48 @@ class SubcategoriesRepository {
             }
         }
     }
+
+    // Método para eliminar subcategoría por id_categoria e id_subcategoria
+    suspend fun deleteSubcategory(idCategoria: Int, idSubcategoria: Int): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            val response = api.deleteSubcategory(idCategoria, idSubcategoria).execute()
+            if (response.isSuccessful) {
+                val msg = JSONObject(response.body()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = msg,
+                    code = response.code()
+                )
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = errorMsg,
+                    code = response.code()
+                )
+            }
+        }
+    }
+
+    // Método para actualizar subcategoría por id_categoria e id_subcategoria
+    suspend fun updateSubcategory(idCategoria: Int, idSubcategoria: Int, subcategory: Subcategory): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            val response = api.updateSubcategory(idCategoria, idSubcategoria, subcategory).execute()
+            if (response.isSuccessful) {
+                val msg = JSONObject(response.body()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = msg,
+                    code = response.code()
+                )
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = errorMsg,
+                    code = response.code()
+                )
+            }
+        }
+    }
 }
