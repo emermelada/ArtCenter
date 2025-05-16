@@ -163,7 +163,7 @@ fun CategoriesScreen(
                                             text = { Text("Editar", color = Color.White) },
                                             onClick = {
                                                 menuExpanded = false
-                                                // Acción de editar
+                                                navController.navigate("${Destinations.CREATE_CATEGORIES}/${category.id}")
                                             }
                                         )
                                         DropdownMenuItem(
@@ -180,6 +180,7 @@ fun CategoriesScreen(
                     }
                 }
             }
+            else -> {  }
         }
 
         // Diálogo de confirmación, solo si categoryToDelete no es null
@@ -206,7 +207,7 @@ fun CategoriesScreen(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Button(
-                    onClick = { onClickNav(Destinations.CREATE_CATEGORIES) },
+                    onClick = { onClickNav("${Destinations.CREATE_CATEGORIES}/0") },
                     modifier = Modifier
                         .height(50.dp)
                         .padding(end = 8.dp),

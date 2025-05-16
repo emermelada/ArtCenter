@@ -214,6 +214,7 @@ fun RegisterScreen(
                         intentoRegistro = false
                         errorMessage = (uiStateRegister as UiState.Error).message
                     }
+                    else -> {  }
                 }
             }
         }

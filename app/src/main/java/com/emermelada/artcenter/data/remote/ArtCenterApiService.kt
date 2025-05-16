@@ -8,7 +8,6 @@ import com.emermelada.artcenter.data.model.profile.UserUpdateRequest
 import com.emermelada.artcenter.data.model.subcategories.Subcategory
 import com.emermelada.artcenter.data.model.subcategories.SubcategoryRequest
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
@@ -50,7 +49,7 @@ interface ArtCenterApiService {
 
     // Método para actualizar categoría por id
     @PUT("categorias/{id}")
-    fun updateCategoryById(@Path("id") id: Int, @Body category: CategorySimple): Call<ResponseBody>
+    fun updateCategoryById(@Path("id") id: Int, @Body category: Category): Call<ResponseBody>
 
     // Métodos para Subcategorías
 

@@ -39,8 +39,9 @@ fun AppNavGraph(
                 CategoriesScreen(onClickNav, navController)
             }
 
-            composable(Destinations.CREATE_CATEGORIES) {
-                CreateCategoriesScreen(onClickNav)
+            composable("${Destinations.CREATE_CATEGORIES}/{id}") { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")?.toInt() ?: 0
+                CreateCategoriesScreen(id, onClickNav)
             }
 
             composable(Destinations.CREATE_SUBCATEGORIES) {

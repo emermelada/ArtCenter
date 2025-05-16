@@ -142,6 +142,7 @@ fun SubcategoriesScreen(
             is UiState.Error ->{
                 // Manejar error si es necesario
             }
+            else -> {  }
         }
 
 
@@ -191,6 +192,7 @@ fun SubcategoriesScreen(
                 }
 
             }
+            else -> {  }
         }
     }
 }

@@ -13,18 +13,41 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.emermelada.artcenter.data.model.categories.Category
 import com.emermelada.artcenter.ui.UiState
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 
 @Composable
 fun CreateCategoriesScreen(
+    id: Int,
     onClickNav: (String) -> Unit,
     viewModel: CreateCategoryViewModel = hiltViewModel()
 ) {
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
+    val categoryState by viewModel.categoryState.collectAsState()
+
+    // Solo cargar categoría si id != 0 (editar)
+    LaunchedEffect(id) {
+        if (id != 0) {
+            viewModel.loadCategory(id)
+        }
+    }
+
+    // Cuando cambia categoryState a Success, llenar campos para editar
+    LaunchedEffect(categoryState) {
+        if (categoryState is UiState.Success<*>) {
+            val category = (categoryState as UiState.Success<Category>).data
+            nombre = category.nombre
+            descripcion = category.descripcion
+        } else if (id == 0) {
+            // Nuevo: limpiar campos para creación
+            nombre = ""
+            descripcion = ""
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -40,7 +63,7 @@ fun CreateCategoriesScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Crear nueva categoría",
+                text = if (id == 0) "Crear nueva categoría" else "Editar categoría",
                 fontSize = 20.sp,
                 color = Color.DarkGray
             )
@@ -80,22 +103,24 @@ fun CreateCategoriesScreen(
 
         when (uiState) {
             is UiState.Error -> {
-                Text(
-                    text = (uiState as UiState.Error).message,
-                    color = Color.Red,
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                if (id != 0) {
+                    Text(
+                        text = (uiState as UiState.Error).message,
+                        color = Color.Red,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
             is UiState.Success<*> -> {
                 Text(
-                    text = "Categoría creada correctamente.",
+                    text = if (id == 0) "Categoría creada correctamente." else "Categoría actualizada correctamente.",
                     color = Color(0xFF4CAF50),
                     fontSize = 13.sp,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
-            else -> {}
+            else -> {  }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -105,7 +130,11 @@ fun CreateCategoriesScreen(
                 if (nombre.isBlank() || descripcion.isBlank()) {
                     viewModel.setError("Completa todos los campos.")
                 } else {
-                    viewModel.createCategory(nombre, descripcion)
+                    if (id == 0) {
+                        viewModel.createCategory(nombre, descripcion)
+                    } else {
+                        viewModel.updateCategory(id, nombre, descripcion)
+                    }
                 }
             },
             modifier = Modifier

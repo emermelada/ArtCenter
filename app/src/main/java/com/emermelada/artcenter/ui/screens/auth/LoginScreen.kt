@@ -182,6 +182,7 @@ fun LoginScreen(
                         intentoLogin = false
                         errorMessage = (uiStateLogin as UiState.Error).message
                     }
+                    else -> { }
                 }
             }
         }

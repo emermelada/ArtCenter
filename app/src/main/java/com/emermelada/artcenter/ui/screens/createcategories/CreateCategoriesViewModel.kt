@@ -2,6 +2,7 @@ package com.emermelada.artcenter.ui.screens.createcategories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emermelada.artcenter.data.model.categories.Category
 import com.emermelada.artcenter.data.repositories.CategoriesRepository
 import com.emermelada.artcenter.ui.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,11 +18,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateCategoryViewModel @Inject constructor(
-    private val repository: CategoriesRepository
+    private val categoriesRepository: CategoriesRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    private val _uiState = MutableStateFlow<UiState>(UiState.Idle) // Cambiar Loading por Idle
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _categoryState = MutableStateFlow<UiState>(UiState.Idle)
+    val categoryState: StateFlow<UiState> = _categoryState.asStateFlow()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         val errorMessage = when (throwable) {
@@ -36,7 +40,7 @@ class CreateCategoryViewModel @Inject constructor(
     fun createCategory(nombre: String, descripcion: String) {
         viewModelScope.launch(exceptionHandler) {
             _uiState.value = UiState.Loading
-            val result = repository.createCategory(nombre, descripcion)
+            val result = categoriesRepository.createCategory(nombre, descripcion)
             if (result.code in listOf(200, 201)) {
                 _uiState.value = UiState.Success(result.msg ?: "Categoría creada")
             } else {
@@ -45,7 +49,35 @@ class CreateCategoryViewModel @Inject constructor(
         }
     }
 
+    fun loadCategory(id: Int) {
+        viewModelScope.launch(exceptionHandler) {
+            _categoryState.value = UiState.Loading
+            val result = categoriesRepository.getCategoryById(id)
+            if (result.data != null) {
+                _categoryState.value = UiState.Success(result.data)
+            } else {
+                _categoryState.value = UiState.Error(result.msg ?: "Error al cargar categorías")
+            }
+        }
+    }
+
+    fun updateCategory(id: Int, nombre: String, descripcion: String) {
+        viewModelScope.launch(exceptionHandler) {
+            _uiState.value = UiState.Loading
+            val category = Category(id, nombre, descripcion)
+            val result = categoriesRepository.updateCategoryById(id, category)
+            if (result.code in listOf(200, 201)) {
+                _uiState.value = UiState.Success(result.msg ?: "Categoría actualizada")
+            } else {
+                _uiState.value = UiState.Error(result.msg ?: "Error al actualizar la categoría")
+            }
+        }
+    }
+
     fun setError(message: String) {
         _uiState.value = UiState.Error(message)
     }
+
 }
+
+

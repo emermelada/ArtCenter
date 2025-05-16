@@ -96,9 +96,9 @@ class CategoriesRepository {
         }
     }
 
-    suspend fun updateCategoryById(id: Int, categorySimple: CategorySimple): Result<Unit> {
+    suspend fun updateCategoryById(id: Int, category: Category): Result<Unit> {
         return withContext(Dispatchers.IO) {
-            val response = api.updateCategoryById(id, categorySimple).execute()
+            val response = api.updateCategoryById(id, category).execute()
             if (response.isSuccessful) {
                 val msg = JSONObject(response.body()?.string() ?: "{}").optString("msg")
                 Result(

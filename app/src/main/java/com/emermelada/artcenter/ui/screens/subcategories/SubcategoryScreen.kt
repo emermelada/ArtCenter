@@ -88,6 +88,7 @@ fun SubcategoryScreen(
                 ExpandableSection(title = "Tutoriales", content = subcategory.tutoriales ?: "Sin tutoriales disponibles")
 
             }
+            else -> {  }
         }
     }
 }
