@@ -1,6 +1,5 @@
 package com.emermelada.artcenter.ui.screens.createcategories
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,7 +37,6 @@ fun CreateSubcategoriesScreen(
     var requerimientos by remember { mutableStateOf("") }
     var tutoriales by remember { mutableStateOf("") }
     val errorMessage = remember { mutableStateOf<String?>(null) }
-    val expanded = remember { mutableStateOf(false) }
 
     LaunchedEffect(true) {
         viewModel.fetchCategories()
@@ -52,7 +50,7 @@ fun CreateSubcategoriesScreen(
         if (state is UiState.Success<*>) {
             val subcategory = state.data as? com.emermelada.artcenter.data.model.subcategories.Subcategory
             if (subcategory != null) {
-                nombre = subcategory.nombre ?: ""
+                nombre = subcategory.nombre
                 descripcion = subcategory.historia ?: ""
                 caracteristicas = subcategory.caracteristicas ?: ""
                 requerimientos = subcategory.requerimientos ?: ""
@@ -139,7 +137,7 @@ fun CreateSubcategoriesScreen(
                                     DropdownMenu(
                                         expanded = expanded.value,
                                         onDismissRequest = { expanded.value = false },
-                                        modifier = Modifier.wrapContentSize()  // No ocupa todo el ancho, sólo el necesario
+                                        modifier = Modifier.wrapContentSize()
                                     ) {
                                         categories.forEach { category ->
                                             DropdownMenuItem(
