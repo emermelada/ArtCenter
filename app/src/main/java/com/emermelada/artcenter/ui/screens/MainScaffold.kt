@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +49,7 @@ import com.emermelada.artcenter.R
 import com.emermelada.artcenter.ui.navigation.AppNavGraph
 import com.emermelada.artcenter.ui.navigation.Destinations
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.draw.shadow
 
 
 @Composable
@@ -168,10 +171,20 @@ fun TopBarView(onClickSignOut: () -> Unit, currentScreentitle: String) {
                 Spacer(modifier = Modifier.size(40.dp))  // Equilibrio visual con el icono
             }
         }
-        Divider(
-            thickness = 2.dp,
-            color = Color.DarkGray
-        )
+        if (currentScreentitle != "PERFIL") {
+            // Sombra debajo del divider
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(2.dp, shape = RoundedCornerShape(2.dp)) // Añadir sombra al Box debajo
+            ) {
+                Divider(
+                    thickness = 2.dp,
+                    color = Color.Black,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
     }
 }
 
@@ -188,9 +201,14 @@ fun BottomBarAdminView(
     )
 
     Column {
-        Divider(
+        HorizontalDivider(
             thickness = 2.dp,
-            color = Color.DarkGray
+            color = Color.Black,
+            modifier = Modifier.shadow(
+                elevation = 2.dp, // Ajusta la intensidad de la sombra
+                shape = RoundedCornerShape(4.dp),
+                clip = false
+            )
         )
         Row(
             modifier = Modifier
@@ -240,9 +258,14 @@ fun BottomBarUserView(
     )
 
     Column {
-        Divider(
+        HorizontalDivider(
             thickness = 2.dp,
-            color = Color.DarkGray
+            color = Color.Black,
+            modifier = Modifier.shadow(
+                elevation = 2.dp, // Ajusta la intensidad de la sombra
+                shape = RoundedCornerShape(4.dp),
+                clip = false
+            )
         )
 
         Row(

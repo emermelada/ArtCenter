@@ -35,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -141,7 +143,7 @@ fun SubcategoriesScreen(
                 val subcategorias = (subcategoriesState as UiState.Success<List<Subcategory>>).data
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     itemsIndexed(subcategorias) { index, subcategory ->
@@ -149,7 +151,13 @@ fun SubcategoriesScreen(
 
                         val pastelColor = Color(0xFF3E8A95)
 
-                        Box(modifier = Modifier.fillMaxWidth()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 4.dp) // Padding inferior
+                                .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp)) // Sombra solo en la parte inferior
+                                .clip(RoundedCornerShape(16.dp))
+                        ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -202,7 +210,7 @@ fun SubcategoriesScreen(
                                             .height(60.dp),
                                         colors = ButtonDefaults.buttonColors(pastelColor),
                                         shape = RoundedCornerShape(16.dp),
-                                        border = BorderStroke(2.dp, Color(0xFF3E8A95)) // Color borde similar al de la categoría
+                                        border = BorderStroke(2.dp, MutedBlue)
                                     ) {
                                         Text(
                                             text = subcategory.nombre.uppercase(),

@@ -34,11 +34,14 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
+import com.emermelada.artcenter.ui.theme.MutedBlue
 
 @Composable
 fun ProfileScreen(
@@ -74,7 +77,6 @@ fun ProfileScreen(
 
                 // Llamada al ViewModel para actualizar la foto de perfil
                 profileViewModel.updateProfilePicture(filePart)
-
             } catch (e: Exception) {
                 Log.e("ProfileScreen", "Error al manejar la URI de la imagen", e)
             }
@@ -99,7 +101,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(0.dp),  // Quitamos el padding para que ocupe todo el espacio disponible
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         when (userInfoState) {
@@ -116,153 +118,164 @@ fun ProfileScreen(
             }
 
             is UiState.Success<*> -> {
+                // Contenedor para la parte superior con fondo oscuro
                 Box(
                     modifier = Modifier
-                        .size(160.dp)
-                        .background(Color.LightGray, shape = CircleShape),
+                        .fillMaxWidth()
+                        .background(Color(0xFFD3D3D3)) // Fondo más oscuro
+                        .padding(16.dp), // Ajustamos el espaciado
                     contentAlignment = Alignment.Center
                 ) {
-                    // Si la URL de la foto de perfil está disponible, la mostramos
-                    profileImageUrl?.let {
-                        Image(
-                            painter = rememberImagePainter(it),
-                            contentDescription = "Foto de perfil",
-                            modifier = Modifier
-                                .clickable { pickImage.launch("image/*") }
-                                .size(160.dp)
-                                .clip(CircleShape) // Recorta la imagen a un círculo
-                                .fillMaxSize(), // Esto asegura que ocupe todo el tamaño del Box
-                            contentScale = ContentScale.Crop // Recorta la imagen sin distorsionarla
-                        )
-                    } ?: run {
-                        // Si no hay URL, mostramos el icono de la cámara
-                        Icon(
-                            imageVector = Icons.Filled.PhotoCamera,
-                            contentDescription = "Editar foto",
-                            modifier = Modifier
-                                .clickable { pickImage.launch("image/*") }
-                                .size(160.dp),
-                            tint = Color.Black
-                        )
-                    }
-
-                    // Contenedor adicional para crear espacio alrededor del círculo pequeño
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd) // Coloca el círculo en la parte inferior derecha
-                            .padding(8.dp) // Espaciado adicional alrededor del círculo pequeño
-                    ) {
-                        // Círculo pequeño con el icono de la cámara en la esquina inferior derecha
+                    Column(verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally){
+                        // Foto de perfil
                         Box(
                             modifier = Modifier
-                                .size(30.dp) // Tamaño más pequeño del círculo
-                                .background(Color.White, shape = CircleShape) // Fondo blanco
-                                .border(2.dp, Color.Black, shape = CircleShape) // Borde negro y forma circular
-                                .clip(CircleShape) // Recorta el Box a un círculo
-                                .padding(4.dp) // Padding alrededor del círculo
+                                .size(160.dp)
+                                .background(Color.LightGray, shape = CircleShape),
+                            contentAlignment = Alignment.Center
                         ) {
-                            // Agregar un espaciado extra dentro del círculo para que el icono de la cámara no esté tan pegado
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = "Editar foto",
+                            profileImageUrl?.let {
+                                Image(
+                                    painter = rememberImagePainter(it),
+                                    contentDescription = "Foto de perfil",
+                                    modifier = Modifier
+                                        .size(160.dp)
+                                        .clip(CircleShape) // Recorta la imagen a un círculo
+                                        .fillMaxSize(), // Esto asegura que ocupe todo el tamaño del Box
+                                    contentScale = ContentScale.Crop // Recorta la imagen sin distorsionarla
+                                )
+                            } ?: run {
+                                // Si no hay URL, mostramos el icono de la cámara
+                                Icon(
+                                    imageVector = Icons.Filled.PhotoCamera,
+                                    contentDescription = "Editar foto",
+                                    modifier = Modifier
+                                        .clickable { pickImage.launch("image/*") }
+                                        .size(160.dp),
+                                    tint = Color.Black
+                                )
+                            }
+
+                            Box(
                                 modifier = Modifier
-                                    .fillMaxSize(), // Asegura que el icono se ajuste al tamaño del círculo
-                                tint = Color.Black
-                            )
-                        }
-                    }
-                }
-
-
-
-
-                // Mostrar el mensaje de éxito debajo de la foto de perfil
-                when (updateState) {
-                    is UiState.Success<*> -> {
-                        Text(
-                            text = (updateState as UiState.Success<String>).data,
-                            color = Color.Green,
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                    is UiState.Error -> {
-                        Text(
-                            text = (updateState as UiState.Error).message,
-                            color = Color.Red,
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                    else -> {}
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Nombre de usuario con icono para editar
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    if (isEditing) {
-                        // Campo de texto editable
-                        OutlinedTextField(
-                            value = newUsername,
-                            onValueChange = { newUsername = it },
-                            label = { Text("Nuevo Nombre de Usuario", color = Color.DarkGray) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(0.7f),
-                            textStyle = TextStyle(color = Color.DarkGray)
-                        )
-                        // Botón de confirmación (tick)
-                        IconButton(
-                            onClick = {
-                                if (newUsername.isNotBlank()) {
-                                    profileViewModel.updateUsername(newUsername)
-                                    username = newUsername  // Actualizamos el nombre localmente en la UI
-                                    isEditing = false  // Finalizamos la edición
+                                    .align(Alignment.BottomEnd)
+                                    .padding(8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .background(Color.White, shape = CircleShape)
+                                        .border(2.dp, Color.Black, shape = CircleShape)
+                                        .clip(CircleShape)
+                                        .padding(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Edit,
+                                        contentDescription = "Editar foto",
+                                        modifier = Modifier.fillMaxSize()
+                                            .clickable { pickImage.launch("image/*") },
+                                        tint = Color.Black
+                                    )
                                 }
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Check,
-                                contentDescription = "Confirmar nombre",
-                                tint = Color.Green
-                            )
                         }
-                    } else {
-                        Row {
-                            Text(
-                                text = "Nombre de usuario: ", // "Nombre de usuario:"
-                                fontSize = 18.sp,
-                                fontFamily = LoraFontFamily,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
-                            )
-                            Text(
-                                text = username, // El nombre de usuario
-                                fontSize = 18.sp,
-                                fontFamily = LoraFontFamily,
-                                color = Color.Black
-                            )
-                        }
-                        IconButton(
-                            onClick = {
-                                isEditing = true  // Activamos el modo de edición
-                                newUsername = username  // Rellenamos el campo de texto con el nombre actual
+
+                        // Mensaje de éxito o error al actualizar la foto
+                        when (updateState) {
+                            is UiState.Success<*> -> {
+                                Text(
+                                    text = (updateState as UiState.Success<String>).data,
+                                    color = Color.Green,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
                             }
+                            is UiState.Error -> {
+                                Text(
+                                    text = (updateState as UiState.Error).message,
+                                    color = Color.Red,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                            else -> {}
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Nombre de usuario con opción para editar
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = "Editar nombre de usuario",
-                                tint = Color.Black
-                            )
+                            if (isEditing) {
+                                OutlinedTextField(
+                                    value = newUsername,
+                                    onValueChange = { newUsername = it },
+                                    label = { Text("Nuevo Nombre de Usuario", color = Color.DarkGray) },
+                                    singleLine = true,
+                                    modifier = Modifier.fillMaxWidth(0.7f),
+                                    textStyle = TextStyle(color = Color.DarkGray)
+                                )
+                                IconButton(
+                                    onClick = {
+                                        if (newUsername.isNotBlank()) {
+                                            profileViewModel.updateUsername(newUsername)
+                                            username = newUsername
+                                            isEditing = false
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Check,
+                                        contentDescription = "Confirmar nombre",
+                                        tint = Color.Green
+                                    )
+                                }
+                            } else {
+                                Row {
+                                    Text(
+                                        text = "Nombre de usuario: ",
+                                        fontSize = 18.sp,
+                                        fontFamily = LoraFontFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black // Texto blanco
+                                    )
+                                    Text(
+                                        text = username,
+                                        fontSize = 18.sp,
+                                        fontFamily = LoraFontFamily,
+                                        color = Color.Black // Texto blanco
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        isEditing = true
+                                        newUsername = username
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Edit,
+                                        contentDescription = "Editar nombre de usuario",
+                                        tint = Color.Black // Icono blanco
+                                    )
+                                }
+                            }
                         }
                     }
                 }
+                HorizontalDivider(
+                    thickness = 2.dp,
+                    color = Color.DarkGray,
+                    modifier = Modifier.shadow(
+                        elevation = 2.dp, // Ajusta la intensidad de la sombra
+                        shape = RoundedCornerShape(4.dp),
+                        clip = false
+                    )
+                )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
+                Spacer(modifier = Modifier.height(15.dp))
                 // Botones para otras acciones (publicaciones y guardados)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -287,5 +300,3 @@ fun ProfileScreen(
         }
     }
 }
-
-

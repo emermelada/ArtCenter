@@ -12,6 +12,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,14 +72,19 @@ fun CategoriesScreen(
                 val categorias = (categoriesState as UiState.Success<List<CategorySimple>>).data
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(top = 15.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     itemsIndexed(categorias) { index, category ->
                         var menuExpanded by remember { mutableStateOf(false) }
 
-                        Box(modifier = Modifier.fillMaxWidth()) {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 4.dp) // Padding inferior
+                            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp)) // Sombra solo en la parte inferior
+                            .clip(RoundedCornerShape(16.dp))
+                        ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
