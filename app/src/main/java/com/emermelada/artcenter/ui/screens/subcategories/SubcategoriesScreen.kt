@@ -48,6 +48,7 @@ import com.emermelada.artcenter.ui.components.categories.DeleteDialog
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
+import com.emermelada.artcenter.ui.theme.MutedBlue
 
 @Composable
 fun SubcategoriesScreen(
@@ -74,7 +75,7 @@ fun SubcategoriesScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        when(categoriesState) {
+        when (categoriesState) {
             is UiState.Loading -> { /* Opcional: mostrar loader */ }
             is UiState.Success<*> -> {
                 val categoria = (categoriesState as UiState.Success<Category>).data
@@ -125,7 +126,7 @@ fun SubcategoriesScreen(
             else -> {}
         }
 
-        when(subcategoriesState) {
+        when (subcategoriesState) {
             is UiState.Loading -> {
                 CircularProgressIndicator()
             }
@@ -145,15 +146,8 @@ fun SubcategoriesScreen(
                 ) {
                     itemsIndexed(subcategorias) { index, subcategory ->
                         var menuExpanded by remember { mutableStateOf(false) }
-                        val pastelColors = listOf(
-                            Color(0xFFB3D9F7), Color(0xFFADD8E6), Color(0xFF7EC8E3),
-                            Color(0xFF5AC2D3), Color(0xFF2F9CB6), Color(0xFF5AB6D3),
-                            Color(0xFF9ACBDA), Color(0xFF7CA6B4), Color(0xFF74B1D4),
-                            Color(0xFF61A4C1), Color(0xFF6BB9E4), Color(0xFF79D1D1),
-                            Color(0xFF58A0C6), Color(0xFF89C8D8), Color(0xFF6FBCD9),
-                            Color(0xFF5BB3D1)
-                        )
-                        val color = pastelColors[index % pastelColors.size]
+
+                        val pastelColor = Color(0xFF3E8A95)
 
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Row(
@@ -170,9 +164,9 @@ fun SubcategoriesScreen(
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(60.dp),
-                                        colors = ButtonDefaults.buttonColors(color),
+                                        colors = ButtonDefaults.buttonColors(pastelColor),
                                         shape = RoundedCornerShape(16.dp),
-                                        border = BorderStroke(2.dp, Color.DarkGray)
+                                        border = BorderStroke(2.dp, MutedBlue)
                                     ) {
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
@@ -182,7 +176,7 @@ fun SubcategoriesScreen(
                                             Text(
                                                 text = subcategory.nombre.uppercase(),
                                                 fontSize = 20.sp,
-                                                color = Color.DarkGray,
+                                                color = Color.White,
                                                 fontFamily = LoraFontFamily,
                                                 fontWeight = FontWeight.Bold
                                             )
@@ -193,7 +187,7 @@ fun SubcategoriesScreen(
                                                 Icon(
                                                     Icons.Default.Edit,
                                                     contentDescription = "Opciones Subcategoría",
-                                                    tint = Color.DarkGray
+                                                    tint = Color.White
                                                 )
                                             }
                                         }
@@ -206,14 +200,14 @@ fun SubcategoriesScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(60.dp),
-                                        colors = ButtonDefaults.buttonColors(color),
+                                        colors = ButtonDefaults.buttonColors(pastelColor),
                                         shape = RoundedCornerShape(16.dp),
-                                        border = BorderStroke(2.dp, Color.DarkGray)
+                                        border = BorderStroke(2.dp, Color(0xFF3E8A95)) // Color borde similar al de la categoría
                                     ) {
                                         Text(
                                             text = subcategory.nombre.uppercase(),
                                             fontSize = 20.sp,
-                                            color = Color.DarkGray,
+                                            color = Color.White,
                                             fontFamily = LoraFontFamily,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier.fillMaxWidth(),
@@ -234,14 +228,14 @@ fun SubcategoriesScreen(
                                         onDismissRequest = { menuExpanded = false }
                                     ) {
                                         DropdownMenuItem(
-                                            text = { Text("Editar", color = Color.DarkGray) },
+                                            text = { Text("Editar", color = Color.White) },  // Cambié el color a blanco
                                             onClick = {
                                                 menuExpanded = false
                                                 navController.navigate("${Destinations.CREATE_SUBCATEGORIES}/${categoriaId}/${subcategory.id_subcategoria}")
                                             }
                                         )
                                         DropdownMenuItem(
-                                            text = { Text("Eliminar", color = Color.DarkGray) },
+                                            text = { Text("Eliminar", color = Color.White) },  // Cambié el color a blanco
                                             onClick = {
                                                 menuExpanded = false
                                                 subcategoryToDelete = subcategory
@@ -271,4 +265,3 @@ fun SubcategoriesScreen(
         }
     }
 }
-
