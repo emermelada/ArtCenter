@@ -5,11 +5,17 @@ import com.emermelada.artcenter.data.model.categories.CategorySimple
 import com.emermelada.artcenter.data.model.profile.ProfilePictureResponse
 import com.emermelada.artcenter.data.model.profile.User
 import com.emermelada.artcenter.data.model.profile.UserUpdateRequest
+import com.emermelada.artcenter.data.model.publications.Publication
+import com.emermelada.artcenter.data.model.publications.PublicationRequest
+import com.emermelada.artcenter.data.model.publications.PublicationSimple
 import com.emermelada.artcenter.data.model.subcategories.Subcategory
 import com.emermelada.artcenter.data.model.subcategories.SubcategoryRequest
+import com.emermelada.artcenter.data.model.tags.Tag
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -77,4 +83,25 @@ interface ArtCenterApiService {
         @Path("idSubcategoria") idSubcategoria: Int,
         @Body subcategory: Subcategory
     ): Call<ResponseBody>
+
+    // Métodos para publicaciones
+
+    @GET("publicaciones")
+    fun getAllPublications(): Call<List<PublicationSimple>>
+
+    @GET("publicaciones/{id}")
+    fun getPublicationById(@Path("id") id: Int): Call<Publication>
+
+    @Multipart
+    @POST("publicaciones")
+    suspend fun createPublication(
+        @Part file: MultipartBody.Part,
+        @Part("descripcion") descripcion: RequestBody?,
+        @Part("id_etiqueta") id_etiqueta: RequestBody?
+    ): Response<ResponseBody>
+
+    // Métodos para etiquetas
+
+    @GET("etiquetas")
+    fun getAllTags(): Call<List<Tag>>
 }

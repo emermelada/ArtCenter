@@ -72,6 +72,7 @@ fun MainScaffold(
                 "${Destinations.CREATE_SUBCATEGORIES}/{idCategoria}/{idSubcategoria}" -> "GESTIÓN SUBCATEGORÍA"
                 "${Destinations.SUBCATEGORIES}/{id}" -> "SUBCATEGORÍAS"
                 "${Destinations.SUBCATEGORY}/{idCategoria}/{idSubcategoria}" -> "SUBCATEGORÍA"
+                Destinations.PUBLICATION -> "NUEVA PUBLICACIÓN"
                 else -> "Pantalla Desconocida"
             }
 
@@ -87,8 +88,7 @@ fun MainScaffold(
             AppNavGraph(
                 navController,
                 innerPadding,
-                onClickNav = { destination -> navController.navigate(destination) },
-                onClickSignOut
+                onClickNav = { destination -> navController.navigate(destination) }
             )
         },
         bottomBar = {
@@ -178,10 +178,10 @@ fun TopBarView(onClickSignOut: () -> Unit, currentScreentitle: String) {
                     .fillMaxWidth()
                     .shadow(2.dp, shape = RoundedCornerShape(2.dp)) // Añadir sombra al Box debajo
             ) {
-                Divider(
+                HorizontalDivider(
+                    modifier = Modifier.fillMaxWidth(),
                     thickness = 2.dp,
-                    color = Color.Black,
-                    modifier = Modifier.fillMaxWidth()
+                    color = Color.Black
                 )
             }
         }

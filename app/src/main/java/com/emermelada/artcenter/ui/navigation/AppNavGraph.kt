@@ -14,6 +14,7 @@ import com.emermelada.artcenter.ui.screens.createcategories.CreateCategoriesScre
 import com.emermelada.artcenter.ui.screens.createcategories.CreateSubcategoriesScreen
 import com.emermelada.artcenter.ui.screens.feed.FeedScreen
 import com.emermelada.artcenter.ui.screens.profile.ProfileScreen
+import com.emermelada.artcenter.ui.screens.publication.PublicationScreen
 import com.emermelada.artcenter.ui.screens.subcategories.SubcategoriesScreen
 import com.emermelada.artcenter.ui.screens.subcategories.SubcategoryScreen
 
@@ -21,8 +22,7 @@ import com.emermelada.artcenter.ui.screens.subcategories.SubcategoryScreen
 fun AppNavGraph(
     navController: NavHostController,
     innerPadding: PaddingValues,
-    onClickNav: (String) -> Unit,
-    onClickSignOut: () -> Unit
+    onClickNav: (String) -> Unit
 ) {
 
     Column(
@@ -31,8 +31,12 @@ fun AppNavGraph(
             .fillMaxSize()
     ) {
         NavHost(navController = navController, startDestination = Destinations.FEED) {
+            composable(Destinations.PUBLICATION) {
+                PublicationScreen(onClickNav)
+            }
+
             composable(Destinations.FEED) {
-                FeedScreen()
+                FeedScreen(onClickNav)
             }
 
             composable(Destinations.CATEGORIES) {
