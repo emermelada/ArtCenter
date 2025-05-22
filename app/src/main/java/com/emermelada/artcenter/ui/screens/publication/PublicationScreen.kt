@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -25,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.emermelada.artcenter.data.model.tags.Tag
 import com.emermelada.artcenter.ui.UiState
+import com.emermelada.artcenter.ui.navigation.Destinations
 import java.io.File
 import java.io.FileOutputStream
 
@@ -86,11 +88,11 @@ fun PublicationScreen(
             )
 
             IconButton(
-                onClick = { onClickNav("categories") },
+                onClick = { onClickNav(Destinations.FEED) },
                 modifier = Modifier.align(Alignment.CenterStart)
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Volver",
                     tint = Color.DarkGray
                 )
