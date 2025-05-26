@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 val DarkBlue = Color(0xFF1E2A47)  // Azul oscuro, inspirado en el cielo nocturno
 val MutedBlue = Color(0xFF335B72)  // Azul apagado, en referencia a los tonos del cielo
 val LightBlue = Color(0xFF4F7B8A)  // Azul suave, para los detalles de las estrellas
-val Yellow = Color(0xFFFFE600)  // Amarillo brillante, inspirado en las estrellas
+val Yellow = Color(0xFFFFF9C4)  // Amarillo brillante, inspirado en las estrellas
 val LightGray = Color(0xFFB4C6C1)  // Gris claro, para los elementos de fondo más suaves
 
 // Colores de fondo y superficie
