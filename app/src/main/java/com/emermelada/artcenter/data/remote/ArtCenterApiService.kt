@@ -24,6 +24,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ArtCenterApiService {
     // Métodos para Usuario
@@ -87,7 +88,7 @@ interface ArtCenterApiService {
     // Métodos para publicaciones
 
     @GET("publicaciones")
-    fun getAllPublications(): Call<List<PublicationSimple>>
+    fun getAllPublications(@Query("page") page: Int): Call<List<PublicationSimple>>
 
     @GET("publicaciones/{id}")
     fun getPublicationById(@Path("id") id: Int): Call<Publication>

@@ -11,9 +11,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.ResponseBody
 import org.json.JSONObject
-import retrofit2.Response
 import java.io.File
 import javax.inject.Singleton
 
@@ -21,10 +19,10 @@ import javax.inject.Singleton
 class PublicationRepository {
     private val api = RetroFitInstance.api
 
-    // Obtener todas las publicaciones (solo id y urlContenido)
-    suspend fun getAllPublications(): Result<List<PublicationSimple>> {
+    // Obtener todas las publicaciones
+    suspend fun getAllPublications(page: Int): Result<List<PublicationSimple>> {
         return withContext(Dispatchers.IO) {
-            val response = api.getAllPublications().execute()
+            val response = api.getAllPublications(page).execute()
             if (response.isSuccessful) {
                 Result(
                     data = response.body(),

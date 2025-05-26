@@ -55,8 +55,6 @@ fun PublicationScreen(
     var expandedTags by remember { mutableStateOf(false) }
     var selectedTagName by remember { mutableStateOf<String?>(null) }
 
-    val scrollState = rememberScrollState()
-
     // Selector de imagen usando ActivityResultLauncher
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -77,6 +75,16 @@ fun PublicationScreen(
     // Cargar etiquetas cuando la pantalla se inicia
     LaunchedEffect(Unit) {
         viewModel.fetchTags()
+    }
+
+    LaunchedEffect(uploadState) {
+        if (uploadState is UiState.Success<*>) {
+            descripcion = ""
+            selectedTagName = null
+            viewModel.selectedTagId = null
+            selectedImageUri = null
+            selectedImageFile = null
+        }
     }
 
     Column(
@@ -177,12 +185,33 @@ fun PublicationScreen(
             }
         }
 
+        when (uploadState) {
+            is UiState.Loading -> {
+                CircularProgressIndicator()
+            }
+            is UiState.Success<*> -> {
+                Text(
+                    text = (uploadState as UiState.Success<String>).data,
+                    color = Color(0xFF4CAF50),
+                    fontSize = 14.sp
+                )
+            }
+            is UiState.Error -> {
+                Text(
+                    text = (uploadState as UiState.Error).message,
+                    color = Color.Red,
+                    fontSize = 14.sp
+                )
+            }
+            else -> {}
+        }
+
         if (selectedImageUri != null) {
             Image(
                 painter = rememberAsyncImagePainter(selectedImageUri),
                 contentDescription = "Imagen seleccionada",
                 modifier = Modifier
-                    .padding(24.dp)
+                    .padding(12.dp)
                     .clickable { pickImage.launch("image/*") }
                     .heightIn(max = 350.dp)                      // altura tope
                     .wrapContentWidth()                          // ancho según proporción
@@ -218,7 +247,7 @@ fun PublicationScreen(
             maxLines = 4
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {
@@ -231,29 +260,6 @@ fun PublicationScreen(
             shape = RoundedCornerShape(8.dp)
         ) {
             Text("Crear publicación")
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        when (uploadState) {
-            is UiState.Loading -> {
-                CircularProgressIndicator()
-            }
-            is UiState.Success<*> -> {
-                Text(
-                    text = (uploadState as UiState.Success<String>).data,
-                    color = Color(0xFF4CAF50),
-                    fontSize = 14.sp
-                )
-            }
-            is UiState.Error -> {
-                Text(
-                    text = (uploadState as UiState.Error).message,
-                    color = Color.Red,
-                    fontSize = 14.sp
-                )
-            }
-            else -> {}
         }
     }
 }

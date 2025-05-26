@@ -72,7 +72,8 @@ fun CategoriesScreen(
                 val categorias = (categoriesState as UiState.Success<List<CategorySimple>>).data
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.weight(1f)
+                        .fillMaxWidth(),
                     contentPadding = PaddingValues(top = 15.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -207,7 +208,7 @@ fun CategoriesScreen(
             Spacer(modifier = Modifier.height(4.dp))
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.Bottom

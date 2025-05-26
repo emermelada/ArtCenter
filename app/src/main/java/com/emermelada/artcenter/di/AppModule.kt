@@ -4,6 +4,7 @@ import android.content.Context
 import com.emermelada.artcenter.data.repositories.AuthRepository
 import com.emermelada.artcenter.data.repositories.CategoriesRepository
 import com.emermelada.artcenter.data.repositories.PreferencesRepository
+import com.emermelada.artcenter.data.repositories.PublicationRepository
 import com.emermelada.artcenter.data.repositories.SubcategoriesRepository
 import com.emermelada.artcenter.data.repositories.UserRepository
 import com.emermelada.artcenter.data.repositories.dataStore
@@ -48,5 +49,11 @@ object AppModule {
     @Singleton
     fun provideUserRepository(): UserRepository {
         return UserRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun providePublicationRepository(): PublicationRepository {
+        return PublicationRepository()
     }
 }
