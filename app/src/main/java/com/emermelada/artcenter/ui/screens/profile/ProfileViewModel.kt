@@ -2,6 +2,7 @@ package com.emermelada.artcenter.ui.screens.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emermelada.artcenter.data.model.publications.PublicationSimple
 import com.emermelada.artcenter.data.repositories.PublicationRepository
 import com.emermelada.artcenter.data.repositories.UserRepository
 import com.emermelada.artcenter.ui.UiState
@@ -24,6 +25,45 @@ class ProfileViewModel @Inject constructor(
     private val _updateState = MutableStateFlow<UiState>(UiState.Loading)
     val updateState: StateFlow<UiState> get() = _updateState
 
+    // — Estados para mis publicaciones y publicaciones guardadas —
+    private val _myPublications = MutableStateFlow<List<PublicationSimple>>(emptyList())
+    val myPublications: StateFlow<List<PublicationSimple>> = _myPublications
+
+    private val _savedPublications = MutableStateFlow<List<PublicationSimple>>(emptyList())
+    val savedPublications: StateFlow<List<PublicationSimple>> = _savedPublications
+
+    private val _isLoadingPublications = MutableStateFlow(false)
+    val isLoadingPublications: StateFlow<Boolean> = _isLoadingPublications
+
+    private var myPage = 0
+    private var savedPage = 0
+
+    /** Carga “tus publicaciones” con paginación incremental */
+    fun loadMyPublications() {
+        viewModelScope.launch {
+            _isLoadingPublications.value = true
+            val result = publicationRepository.getMyPublications(myPage)
+            result.data?.let {
+                _myPublications.value = _myPublications.value + it
+                myPage++
+            }
+            _isLoadingPublications.value = false
+        }
+    }
+
+    /** Carga “publicaciones guardadas” con paginación incremental */
+    fun loadSavedPublications() {
+        viewModelScope.launch {
+            _isLoadingPublications.value = true
+            val result = publicationRepository.getSavedPublications(savedPage)
+            result.data?.let {
+                _savedPublications.value = _savedPublications.value + it
+                savedPage++
+            }
+            _isLoadingPublications.value = false
+        }
+    }
+
     fun fetchUserInfo() {
         viewModelScope.launch {
             _userInfoState.value = UiState.Loading
@@ -41,8 +81,9 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _updateState.value = UiState.Loading
             val result = userRepository.updateUsername(username)
-            if (result.data != null) {
-                _updateState.value = UiState.Success(result.msg)
+            if (result.code in 200..299) {
+                // Forzamos mensaje de éxito aunque data sea nulo
+                _updateState.value = UiState.Success("Nombre de usuario actualizado correctamente")
             } else {
                 _updateState.value = UiState.Error(result.msg ?: "Error al actualizar el nombre")
             }
@@ -65,5 +106,45 @@ class ProfileViewModel @Inject constructor(
                 _updateState.value = UiState.Error(result.msg ?: "Error al actualizar la foto de perfil")
             }
         }
+    }
+
+    /** Alterna guardado en ambas vistas */
+    fun toggleSave(pub: PublicationSimple) {
+        viewModelScope.launch {
+            val result = publicationRepository.toggleBookmark(pub.id)
+            if (result.code in 200..299) {
+                // myPublications
+                _myPublications.value = _myPublications.value.map {
+                    if (it.id == pub.id) it.copy(saved = !it.saved) else it
+                }
+                // savedPublications: si acabas de guardar lo añades al principio
+                if (!pub.saved) {
+                    _savedPublications.value = listOf(pub.copy(saved = true)) + _savedPublications.value
+                } else {
+                    // si acabas de desguardar, lo quitas
+                    _savedPublications.value = _savedPublications.value.filter { it.id != pub.id }
+                }
+            }
+        }
+    }
+
+    /** Alterna like en ambas vistas */
+    fun toggleLike(pub: PublicationSimple) {
+        viewModelScope.launch {
+            val result = publicationRepository.toggleLike(pub.id)
+            if (result.code in 200..299) {
+                // actualiza liked
+                _myPublications.value = _myPublications.value.map {
+                    if (it.id == pub.id) it.copy(liked = !it.liked) else it
+                }
+                _savedPublications.value = _savedPublications.value.map {
+                    if (it.id == pub.id) it.copy(liked = !it.liked) else it
+                }
+            }
+        }
+    }
+
+    fun clearUpdateState() {
+        _updateState.value = UiState.Loading
     }
 }
