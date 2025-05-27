@@ -2,6 +2,7 @@ package com.emermelada.artcenter.ui.screens.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emermelada.artcenter.data.repositories.PublicationRepository
 import com.emermelada.artcenter.data.repositories.UserRepository
 import com.emermelada.artcenter.ui.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val publicationRepository: PublicationRepository
 ): ViewModel() {
 
     private val _userInfoState = MutableStateFlow<UiState>(UiState.Loading)

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// FeedViewModel.kt
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     private val publicationRepository: PublicationRepository
@@ -25,23 +26,36 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // Obtener el resultado de la API
                 val result = publicationRepository.getAllPublications(page)
-
-                // Verificar si el resultado es exitoso
-                if (result.data != null) {
-                    // Si es exitoso, agregar las publicaciones
-                    _publications.value += result.data
-                } else {
-                    // Si no, manejar el error (puedes mostrar un mensaje de error o lo que necesites)
-                    // Aquí puedes manejar el error si es necesario
+                result.data?.let { list ->
+                    _publications.value = _publications.value + list
                 }
-            } catch (e: Exception) {
-                // Manejo de excepciones si ocurre algún error en la solicitud
-                // Aquí podrías agregar lógica para manejar excepciones de red, etc.
             } finally {
                 _isLoading.value = false
             }
         }
     }
+
+    fun toggleSave(pub: PublicationSimple) {
+        viewModelScope.launch {
+            val result = publicationRepository.toggleBookmark(pub.id)
+            if (result.code in 200..299) {
+                _publications.value = _publications.value.map {
+                    if (it.id == pub.id) it.copy(saved = !pub.saved) else it
+                }
+            }
+        }
+    }
+
+    fun toggleLike(pub: PublicationSimple) {
+        viewModelScope.launch {
+            val result = publicationRepository.toggleLike(pub.id)
+            if (result.code in 200..299) {
+                _publications.value = _publications.value.map {
+                    if (it.id == pub.id) it.copy(liked = !pub.liked) else it
+                }
+            }
+        }
+    }
 }
+

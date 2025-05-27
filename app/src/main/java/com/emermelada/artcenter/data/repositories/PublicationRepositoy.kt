@@ -87,4 +87,74 @@ class PublicationRepository {
             Result(data = null, msg = e.localizedMessage ?: "Error desconocido", code = 500)
         }
     }
+
+    // Obtener mis publicaciones
+    suspend fun getMyPublications(page: Int): Result<List<PublicationSimple>> =
+        withContext(Dispatchers.IO) {
+            val response = api.getMyPublications(page).execute()
+            if (response.isSuccessful) {
+                Result(
+                    data = response.body(),
+                    msg = null,
+                    code = response.code()
+                )
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}")
+                    .optString("msg")
+                Result(
+                    data = null,
+                    msg = errorMsg,
+                    code = response.code()
+                )
+            }
+        }
+
+    // Obtener publicaciones guardadas
+    suspend fun getSavedPublications(page: Int): Result<List<PublicationSimple>> =
+        withContext(Dispatchers.IO) {
+            val response = api.getSavedPublications(page).execute()
+            if (response.isSuccessful) {
+                Result(
+                    data = response.body(),
+                    msg = null,
+                    code = response.code()
+                )
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}")
+                    .optString("msg")
+                Result(
+                    data = null,
+                    msg = errorMsg,
+                    code = response.code()
+                )
+            }
+        }
+
+    // Guardar / quitar guardado de una publicación
+    suspend fun toggleBookmark(publicationId: Int): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            val response = api.bookmarkPublication(publicationId).execute()
+            if (response.isSuccessful) {
+                // 201 = guardado, 200 = eliminado
+                Result(data = null, msg = response.body()?.string() ?: "Operación realizada", code = response.code())
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}")
+                    .optString("msg")
+                Result(data = null, msg = errorMsg, code = response.code())
+            }
+        }
+
+    // Dar o quitar like a una publicación
+    suspend fun toggleLike(publicationId: Int): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            val response = api.likePublication(publicationId).execute()
+            if (response.isSuccessful) {
+                // 201 = like, 200 = unlike
+                Result(data = null, msg = response.body()?.string() ?: "Operación realizada", code = response.code())
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}")
+                    .optString("msg")
+                Result(data = null, msg = errorMsg, code = response.code())
+            }
+        }
 }

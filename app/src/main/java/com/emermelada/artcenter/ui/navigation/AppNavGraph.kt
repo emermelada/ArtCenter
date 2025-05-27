@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import com.emermelada.artcenter.ui.screens.categories.CategoriesScreen
 import com.emermelada.artcenter.ui.screens.createcategories.CreateCategoriesScreen
 import com.emermelada.artcenter.ui.screens.createcategories.CreateSubcategoriesScreen
+import com.emermelada.artcenter.ui.screens.details_publication.DetailsPublicationScreen
 import com.emermelada.artcenter.ui.screens.feed.FeedScreen
 import com.emermelada.artcenter.ui.screens.profile.ProfileScreen
 import com.emermelada.artcenter.ui.screens.publication.PublicationScreen
@@ -67,6 +68,11 @@ fun AppNavGraph(
 
             composable(Destinations.PROFILE) {
                 ProfileScreen(onClickNav)
+            }
+
+            composable("${Destinations.DETAILS_PUBLICATION}/{idPublicacion}"){ backStackEntry ->
+                val idPublicacion = backStackEntry.arguments?.getString("idPublicacion")?.toIntOrNull() ?: 0
+                DetailsPublicationScreen(idPublicacion, onClickNav)
             }
         }
     }

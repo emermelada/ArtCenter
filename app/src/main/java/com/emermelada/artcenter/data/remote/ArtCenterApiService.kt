@@ -90,6 +90,12 @@ interface ArtCenterApiService {
     @GET("publicaciones")
     fun getAllPublications(@Query("page") page: Int): Call<List<PublicationSimple>>
 
+    @GET("publicaciones/mias")
+    fun getMyPublications(@Query("page") page: Int): Call<List<PublicationSimple>>         // Mis publicaciones
+
+    @GET("publicaciones/guardadas")
+    fun getSavedPublications(@Query("page") page: Int): Call<List<PublicationSimple>>      // Publicaciones guardadas
+
     @GET("publicaciones/{id}")
     fun getPublicationById(@Path("id") id: Int): Call<Publication>
 
@@ -100,6 +106,12 @@ interface ArtCenterApiService {
         @Part("descripcion") descripcion: RequestBody?,
         @Part("id_etiqueta") id_etiqueta: RequestBody?
     ): Response<ResponseBody>
+
+    @POST("publicaciones/{id}/guardar")
+    fun bookmarkPublication(@Path("id") id: Int): Call<ResponseBody>                         // Guardar (bookmark)
+
+    @POST("publicaciones/{id}/like")
+    fun likePublication(@Path("id") id: Int): Call<ResponseBody>
 
     // Métodos para etiquetas
 

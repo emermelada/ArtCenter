@@ -13,4 +13,5 @@ object Destinations {
     const val CREATE_CATEGORIES = "create_categories"
     const val CREATE_SUBCATEGORIES = "create_subcategories"
     const val PUBLICATION = "publication"
+    const val DETAILS_PUBLICATION = "details publication"
 }
