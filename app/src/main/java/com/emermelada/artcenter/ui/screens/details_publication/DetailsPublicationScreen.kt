@@ -1,4 +1,3 @@
-// DetailsPublicationScreen.kt
 package com.emermelada.artcenter.ui.screens.details_publication
 
 import android.widget.Toast
@@ -31,24 +30,25 @@ import coil.compose.rememberAsyncImagePainter
 import com.emermelada.artcenter.data.model.comments.CommentSimple
 import com.emermelada.artcenter.data.model.publications.Publication
 import com.emermelada.artcenter.ui.UiState
+import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.LightGray
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsPublicationScreen(
     idPublicacion: Int,
     onClickNav: (String) -> Unit,
+    mainScaffoldViewModel: MainScaffoldViewModel = hiltViewModel(),
     viewModel: DetailsPublicationViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 
-    // 1) Recolectamos los StateFlow del ViewModel
+    val userRole by mainScaffoldViewModel.userRol.collectAsState()
+
     val publicationState by viewModel.publicationState.collectAsState()
     val commentsState by viewModel.commentsState.collectAsState()
     val addCommentState by viewModel.addCommentState.collectAsState()
 
-    // Estados de like, bookmark y contador
     val isLiked by viewModel.isLiked.collectAsState()
     val isSaved by viewModel.isSaved.collectAsState()
     val likesCount by viewModel.likesCount.collectAsState()
@@ -56,7 +56,6 @@ fun DetailsPublicationScreen(
     var newCommentText by remember { mutableStateOf("") }
     var showComments by remember { mutableStateOf(false) }
 
-    // Cargar datos al iniciar/componer
     LaunchedEffect(idPublicacion) {
         viewModel.loadPublication(idPublicacion)
         viewModel.loadComments(idPublicacion)
@@ -103,6 +102,7 @@ fun DetailsPublicationScreen(
                 )
             }
         }
+
         // Card principal con imagen y detalles
         Card(
             modifier = Modifier
@@ -117,7 +117,6 @@ fun DetailsPublicationScreen(
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             ) {
-                // Cabecera: imagen de la publicación
                 when (publicationState) {
                     is UiState.Loading -> {
                         Box(
@@ -155,7 +154,6 @@ fun DetailsPublicationScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Detalles (descripción, hashtag y fecha) justo debajo de la imagen
                 if (publicationState is UiState.Success<*>) {
                     val publication = (publicationState as UiState.Success<Publication>).data
                     PublicationDetails(publication = publication)
@@ -165,7 +163,7 @@ fun DetailsPublicationScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botones de Like, Guardar y Comentarios (separados de la Card grande)
+        // Botones de Like, Guardar y Comentarios
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -181,58 +179,69 @@ fun DetailsPublicationScreen(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Like: icono dinámico basado en isLiked y likesCount
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { viewModel.toggleLike(idPublicacion) }
-                ) {
-                    Icon(
-                        imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Like",
-                        tint = if (isLiked) Color.Red else DarkBlue,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = likesCount.toString(),
-                        color = Color.DarkGray,
-                        fontSize = 14.sp
-                    )
-                }
+                if (userRole == "admin") {
+                    // Solo mostrar icono de comentarios para admin (sin like ni guardar)
+                    IconButton(onClick = { showComments = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.Comment,
+                            contentDescription = "Comentarios",
+                            tint = DarkBlue,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                } else {
+                    // Usuarios normales ven Like, Guardar y Comentarios
 
-                // Guardar: icono dinámico basado en isSaved
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { viewModel.toggleBookmark(idPublicacion) }
-                ) {
-                    Icon(
-                        imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                        contentDescription = "Guardar",
-                        tint = DarkBlue,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = if (isSaved) "Guardado" else "Guardar",
-                        color = Color.DarkGray,
-                        fontSize = 14.sp
-                    )
-                }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { viewModel.toggleLike(idPublicacion) }
+                    ) {
+                        Icon(
+                            imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = "Like",
+                            tint = if (isLiked) Color.Red else DarkBlue,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = likesCount.toString(),
+                            color = Color.DarkGray,
+                            fontSize = 14.sp
+                        )
+                    }
 
-                // Comentarios: solo icono
-                IconButton(onClick = { showComments = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.Comment,
-                        contentDescription = "Comentarios",
-                        tint = DarkBlue,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { viewModel.toggleBookmark(idPublicacion) }
+                    ) {
+                        Icon(
+                            imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                            contentDescription = "Guardar",
+                            tint = DarkBlue,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (isSaved) "Guardado" else "Guardar",
+                            color = Color.DarkGray,
+                            fontSize = 14.sp
+                        )
+                    }
+
+                    IconButton(onClick = { showComments = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.Comment,
+                            contentDescription = "Comentarios",
+                            tint = DarkBlue,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             }
         }
     }
 
-    // Overlay de comentarios (ocupa 3/4 de la pantalla desde abajo)
+    // Overlay de comentarios
     if (showComments) {
         Box(
             modifier = Modifier
@@ -249,7 +258,6 @@ fun DetailsPublicationScreen(
                     .background(Color.White)
                     .padding(16.dp)
             ) {
-                // Tirador superior
                 Box(
                     modifier = Modifier
                         .width(40.dp)
@@ -268,7 +276,6 @@ fun DetailsPublicationScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Lista de comentarios
                 when (commentsState) {
                     is UiState.Loading -> {
                         Box(
@@ -324,41 +331,42 @@ fun DetailsPublicationScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo para añadir comentario
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = newCommentText,
-                        onValueChange = { newCommentText = it },
-                        modifier = Modifier.weight(1f),
-                        placeholder = {
-                            Text(
-                                text = "Escribe un comentario...",
-                                fontSize = 14.sp,
-                                color = Color.DarkGray
-                            )
-                        },
-                        textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
-                        maxLines = 3,
-                        enabled = addCommentState !is UiState.Loading
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(
-                        onClick = {
-                            if (newCommentText.isNotBlank()) {
-                                viewModel.addComment(idPublicacion, newCommentText.trim())
-                            }
-                        },
-                        enabled = newCommentText.isNotBlank() && addCommentState !is UiState.Loading
+                // Campo para añadir comentario solo si NO es admin
+                if (userRole != "admin") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Send,
-                            contentDescription = "Enviar Comentario",
-                            tint = DarkBlue
+                        OutlinedTextField(
+                            value = newCommentText,
+                            onValueChange = { newCommentText = it },
+                            modifier = Modifier.weight(1f),
+                            placeholder = {
+                                Text(
+                                    text = "Escribe un comentario...",
+                                    fontSize = 14.sp,
+                                    color = Color.DarkGray
+                                )
+                            },
+                            textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
+                            maxLines = 3,
+                            enabled = addCommentState !is UiState.Loading
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = {
+                                if (newCommentText.isNotBlank()) {
+                                    viewModel.addComment(idPublicacion, newCommentText.trim())
+                                }
+                            },
+                            enabled = newCommentText.isNotBlank() && addCommentState !is UiState.Loading
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Send,
+                                contentDescription = "Enviar Comentario",
+                                tint = DarkBlue
+                            )
+                        }
                     }
                 }
             }
@@ -437,8 +445,8 @@ fun CommentItem(comment: CommentSimple) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = comment.username +": ",
-                style = TextStyle(fontSize = 14.sp, color = DarkBlue,fontWeight = FontWeight.Bold)
+                text = comment.username + ": ",
+                style = TextStyle(fontSize = 14.sp, color = DarkBlue, fontWeight = FontWeight.Bold)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
