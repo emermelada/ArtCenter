@@ -112,10 +112,16 @@ interface ArtCenterApiService {
     ): Response<ResponseBody>
 
     @POST("publicaciones/{id}/guardar")
-    fun bookmarkPublication(@Path("id") id: Int): Call<ResponseBody>                         // Guardar (bookmark)
+    fun bookmarkPublication(@Path("id") id: Int): Call<ResponseBody>
 
     @POST("publicaciones/{id}/like")
     fun likePublication(@Path("id") id: Int): Call<ResponseBody>
+
+    @GET("publicaciones/buscar")
+    fun searchPublications(
+        @Query("q") query: String,
+        @Query("page") page: Int = 0
+    ): Call<List<PublicationSimple>>
 
     // Métodos para etiquetas
 
@@ -124,18 +130,15 @@ interface ArtCenterApiService {
 
     // Métodos para comentarios
 
-    // Obtener todos los comentarios de una publicación
     @GET("publicaciones/{id_publicacion}/comentarios")
     fun getCommentsByPublication(@Path("id_publicacion") publicationId: Int): Call<List<CommentSimple>>
 
-    // Crear un comentario en una publicación
     @POST("publicaciones/{id_publicacion}/comentarios")
     fun createComment(
         @Path("id_publicacion") publicationId: Int,
         @Body commentCreateRequest: CommentCreateRequest
     ): Call<CommentCreateResponse>
 
-    // Eliminar un comentario (solo admin)
     @DELETE("comentarios/{id_comentario}")
     fun deleteComment(@Path("id_comentario") commentId: Int): Call<CommentDeleteResponse>
 }

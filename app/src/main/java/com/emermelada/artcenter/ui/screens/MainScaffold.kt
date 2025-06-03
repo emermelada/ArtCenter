@@ -68,6 +68,7 @@ fun MainScaffold(
                 Destinations.FEED -> "ARTCENTER"
                 Destinations.PROFILE -> "PERFIL"
                 Destinations.CATEGORIES -> "CATEGORÍAS"
+                Destinations.SEARCH -> "BUSCAR"
                 "${Destinations.CREATE_CATEGORIES}/{id}" -> "GESTIÓN CATEGORÍA"
                 "${Destinations.CREATE_SUBCATEGORIES}/{idCategoria}/{idSubcategoria}" -> "GESTIÓN SUBCATEGORÍA"
                 "${Destinations.SUBCATEGORIES}/{id}" -> "SUBCATEGORÍAS"

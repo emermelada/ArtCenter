@@ -16,6 +16,7 @@ import com.emermelada.artcenter.ui.screens.details_publication.DetailsPublicatio
 import com.emermelada.artcenter.ui.screens.feed.FeedScreen
 import com.emermelada.artcenter.ui.screens.profile.ProfileScreen
 import com.emermelada.artcenter.ui.screens.publication.PublicationScreen
+import com.emermelada.artcenter.ui.screens.search.SearchPublicationsScreen
 import com.emermelada.artcenter.ui.screens.subcategories.SubcategoriesScreen
 import com.emermelada.artcenter.ui.screens.subcategories.SubcategoryScreen
 
@@ -73,6 +74,10 @@ fun AppNavGraph(
             composable("${Destinations.DETAILS_PUBLICATION}/{idPublicacion}"){ backStackEntry ->
                 val idPublicacion = backStackEntry.arguments?.getString("idPublicacion")?.toIntOrNull() ?: 0
                 DetailsPublicationScreen(idPublicacion, onClickNav)
+            }
+
+            composable(Destinations.SEARCH) {
+                SearchPublicationsScreen(onClickNav)
             }
         }
     }

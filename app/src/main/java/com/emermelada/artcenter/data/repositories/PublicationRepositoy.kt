@@ -157,4 +157,25 @@ class PublicationRepository {
                 Result(data = null, msg = errorMsg, code = response.code())
             }
         }
+
+    // Buscar publicaciones por término en categoría, subcategoría o descripción
+    suspend fun searchPublications(query: String, page: Int = 0): Result<List<PublicationSimple>> =
+        withContext(Dispatchers.IO) {
+            val response = api.searchPublications(query, page).execute()
+            if (response.isSuccessful) {
+                Result(
+                    data = response.body(),
+                    msg = null,
+                    code = response.code()
+                )
+            } else {
+                val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}").optString("msg")
+                Result(
+                    data = null,
+                    msg = errorMsg,
+                    code = response.code()
+                )
+            }
+        }
+
 }
