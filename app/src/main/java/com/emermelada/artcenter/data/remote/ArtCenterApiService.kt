@@ -2,6 +2,10 @@ package com.emermelada.artcenter.data.remote
 
 import com.emermelada.artcenter.data.model.categories.Category
 import com.emermelada.artcenter.data.model.categories.CategorySimple
+import com.emermelada.artcenter.data.model.comments.CommentCreateRequest
+import com.emermelada.artcenter.data.model.comments.CommentCreateResponse
+import com.emermelada.artcenter.data.model.comments.CommentDeleteResponse
+import com.emermelada.artcenter.data.model.comments.CommentSimple
 import com.emermelada.artcenter.data.model.profile.ProfilePictureResponse
 import com.emermelada.artcenter.data.model.profile.User
 import com.emermelada.artcenter.data.model.profile.UserUpdateRequest
@@ -117,4 +121,21 @@ interface ArtCenterApiService {
 
     @GET("etiquetas")
     fun getAllTags(): Call<List<Tag>>
+
+    // Métodos para comentarios
+
+    // Obtener todos los comentarios de una publicación
+    @GET("publicaciones/{id_publicacion}/comentarios")
+    fun getCommentsByPublication(@Path("id_publicacion") publicationId: Int): Call<List<CommentSimple>>
+
+    // Crear un comentario en una publicación
+    @POST("publicaciones/{id_publicacion}/comentarios")
+    fun createComment(
+        @Path("id_publicacion") publicationId: Int,
+        @Body commentCreateRequest: CommentCreateRequest
+    ): Call<CommentCreateResponse>
+
+    // Eliminar un comentario (solo admin)
+    @DELETE("comentarios/{id_comentario}")
+    fun deleteComment(@Path("id_comentario") commentId: Int): Call<CommentDeleteResponse>
 }

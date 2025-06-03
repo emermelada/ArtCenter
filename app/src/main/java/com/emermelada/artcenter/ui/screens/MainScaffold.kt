@@ -73,6 +73,7 @@ fun MainScaffold(
                 "${Destinations.SUBCATEGORIES}/{id}" -> "SUBCATEGORÍAS"
                 "${Destinations.SUBCATEGORY}/{idCategoria}/{idSubcategoria}" -> "SUBCATEGORÍA"
                 Destinations.PUBLICATION -> "NUEVA PUBLICACIÓN"
+                "${Destinations.DETAILS_PUBLICATION}/{idPublicacion}" -> "PUBLICACIÓN"
                 else -> "Pantalla Desconocida"
             }
 

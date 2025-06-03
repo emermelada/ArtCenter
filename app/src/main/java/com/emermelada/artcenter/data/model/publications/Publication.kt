@@ -6,6 +6,8 @@ data class Publication(
     val descripcion: String?,
     val fecha_publicacion: String,
     val likes: Int,
-    val etiqueta: String?
+    val etiqueta: String?,
+    val liked: Boolean,
+    val saved: Boolean
 )
 

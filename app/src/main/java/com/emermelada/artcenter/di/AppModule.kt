@@ -3,6 +3,7 @@ package com.emermelada.artcenter.di
 import android.content.Context
 import com.emermelada.artcenter.data.repositories.AuthRepository
 import com.emermelada.artcenter.data.repositories.CategoriesRepository
+import com.emermelada.artcenter.data.repositories.CommentRepository
 import com.emermelada.artcenter.data.repositories.PreferencesRepository
 import com.emermelada.artcenter.data.repositories.PublicationRepository
 import com.emermelada.artcenter.data.repositories.SubcategoriesRepository
@@ -55,5 +56,11 @@ object AppModule {
     @Singleton
     fun providePublicationRepository(): PublicationRepository {
         return PublicationRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCommentRepository(): CommentRepository {
+        return CommentRepository()
     }
 }
