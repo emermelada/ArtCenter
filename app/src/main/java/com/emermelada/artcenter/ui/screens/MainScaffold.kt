@@ -197,8 +197,8 @@ fun BottomBarAdminView(
 {
     val icons = listOf(
         Icons.AutoMirrored.Filled.MenuBook to Destinations.CATEGORIES,
-        Icons.Default.Home to Destinations.FEED,
         Icons.Default.Search to Destinations.SEARCH,
+        Icons.Default.Home to Destinations.FEED,
         Icons.Default.SmartToy to Destinations.CHAT
     )
 

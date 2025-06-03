@@ -35,6 +35,9 @@ class ProfileViewModel @Inject constructor(
     private val _isLoadingPublications = MutableStateFlow(false)
     val isLoadingPublications: StateFlow<Boolean> = _isLoadingPublications
 
+    private val _deletePublicationState = MutableStateFlow<UiState>(UiState.Loading)
+    val deletePublicationState: StateFlow<UiState> get() = _deletePublicationState
+
     private var myPage = 0
     private var savedPage = 0
 
@@ -146,5 +149,25 @@ class ProfileViewModel @Inject constructor(
 
     fun clearUpdateState() {
         _updateState.value = UiState.Loading
+    }
+
+    // Nuevo método para eliminar publicación
+    fun deletePublication(publicationId: Int) {
+        viewModelScope.launch {
+            _deletePublicationState.value = UiState.Loading
+            val result = publicationRepository.deletePublication(publicationId)
+            if (result.code in 200..299) {
+                // Actualiza la lista local para quitar la publicación eliminada
+                _myPublications.value = _myPublications.value.filter { it.id != publicationId }
+                _deletePublicationState.value = UiState.Success("Publicación eliminada correctamente")
+            } else {
+                _deletePublicationState.value = UiState.Error(result.msg ?: "Error al eliminar la publicación")
+            }
+        }
+    }
+
+    // Puedes añadir un método para limpiar el estado si quieres:
+    fun clearDeleteState() {
+        _deletePublicationState.value = UiState.Loading
     }
 }

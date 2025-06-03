@@ -79,4 +79,17 @@ class SearchPublicationsViewModel @Inject constructor(
             // Opcional: actualizar UI localmente
         }
     }
+
+    fun deletePublication(publicationId: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repository.deletePublication(publicationId)
+            if (result.msg == "Publicación eliminada correctamente") {
+                // Remover la publicación eliminada de la lista local
+                _publications.value = _publications.value.filterNot { it.id == publicationId }
+            }
+            _isLoading.value = false
+            // Opcional: manejar errores o mostrar mensajes
+        }
+    }
 }

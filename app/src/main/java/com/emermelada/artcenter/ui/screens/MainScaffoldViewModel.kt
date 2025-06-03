@@ -19,4 +19,9 @@ class MainScaffoldViewModel @Inject constructor(
     val userRol: StateFlow<String> = preferencesRepository.userRoleFlow
         .map { it ?: "" } // ← aseguramos que no sea null
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
+    /** Estado observable que representa el id de usuario */
+    val userId: StateFlow<String> = preferencesRepository.userIdFlow
+        .map { it ?: "" }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 }

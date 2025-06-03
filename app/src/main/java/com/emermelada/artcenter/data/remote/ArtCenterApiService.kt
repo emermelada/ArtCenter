@@ -123,6 +123,9 @@ interface ArtCenterApiService {
         @Query("page") page: Int = 0
     ): Call<List<PublicationSimple>>
 
+    @DELETE("publicaciones/{id}")
+    fun deletePublicationById(@Path("id") id: Int): Call<ResponseBody>
+
     // Métodos para etiquetas
 
     @GET("etiquetas")

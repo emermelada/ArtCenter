@@ -178,4 +178,19 @@ class PublicationRepository {
             }
         }
 
+    // Eliminar publicación por id
+    suspend fun deletePublication(publicationId: Int): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.deletePublicationById(publicationId).execute()
+                if (response.isSuccessful) {
+                    Result(data = null, msg = "Publicación eliminada correctamente", code = response.code())
+                } else {
+                    val errorMsg = JSONObject(response.errorBody()?.string() ?: "{}").optString("msg")
+                    Result(data = null, msg = errorMsg, code = response.code())
+                }
+            } catch (e: Exception) {
+                Result(data = null, msg = e.localizedMessage ?: "Error desconocido", code = 500)
+            }
+        }
 }

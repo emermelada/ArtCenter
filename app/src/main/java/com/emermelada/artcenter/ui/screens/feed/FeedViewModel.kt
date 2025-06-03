@@ -57,5 +57,16 @@ class FeedViewModel @Inject constructor(
             }
         }
     }
+
+    // Nuevo método para eliminar una publicación
+    fun deletePublication(publicationId: Int) {
+        viewModelScope.launch {
+            val result = publicationRepository.deletePublication(publicationId)
+            if (result.code in 200..299) {
+                _publications.value = _publications.value.filter { it.id != publicationId }
+            }
+            // Aquí podrías manejar errores o estados si quieres
+        }
+    }
 }
 

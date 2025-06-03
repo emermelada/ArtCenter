@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import com.emermelada.artcenter.data.model.publications.PublicationSimple
 import com.emermelada.artcenter.ui.components.publication.PublicationItem
+import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 import com.emermelada.artcenter.ui.theme.MutedBlue
 import kotlinx.coroutines.flow.collectLatest
@@ -54,8 +55,11 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun ProfileScreen(
     onClickNav: (String) -> Unit,
-    profileViewModel: ProfileViewModel = hiltViewModel()
+    profileViewModel: ProfileViewModel = hiltViewModel(),
+    mainScaffoldViewModel: MainScaffoldViewModel = hiltViewModel()
 ) {
+    val userId by mainScaffoldViewModel.userId.collectAsState()
+
     val context = LocalContext.current
     val userInfoState by profileViewModel.userInfoState.collectAsState()
     val updateState by profileViewModel.updateState.collectAsState() // Obtener el estado de la actualización
@@ -65,7 +69,7 @@ fun ProfileScreen(
     var profileImageUrl by remember { mutableStateOf<String?>(null) }  // Actualización a mutableStateOf para que sea reactivo
 
     // para tabs de publicaciones
-    val myPubs by profileViewModel.myPublications.collectAsState()
+    val myPublications by profileViewModel.myPublications.collectAsState()
     val savedPubs by profileViewModel.savedPublications.collectAsState()
     val isLoadingPubs by profileViewModel.isLoadingPublications.collectAsState()
     var selectedTab by remember { mutableStateOf(0) }
@@ -330,7 +334,7 @@ fun ProfileScreen(
                     Button(
                         onClick = {
                             selectedTab = 0
-                            if (myPubs.isEmpty()) profileViewModel.loadMyPublications()
+                            if (myPublications.isEmpty()) profileViewModel.loadMyPublications()
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (selectedTab == 0) MutedBlue else Color.LightGray
@@ -357,7 +361,7 @@ fun ProfileScreen(
                 LaunchedEffect(gridState, selectedTab) {
                     snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
                         .collectLatest { lastIndex ->
-                            val listSize = if (selectedTab == 0) myPubs.size else savedPubs.size
+                            val listSize = if (selectedTab == 0) myPublications.size else savedPubs.size
                             if (lastIndex == listSize - 1 && !isLoadingPubs) {
                                 if (selectedTab == 0) profileViewModel.loadMyPublications()
                                 else profileViewModel.loadSavedPublications()
@@ -374,16 +378,17 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     val listToShow: List<PublicationSimple> =
-                        if (selectedTab == 0) myPubs else savedPubs
+                        if (selectedTab == 0) myPublications else savedPubs
 
-                    items(listToShow) { pub ->
+                    items(listToShow) { publication ->
                         PublicationItem(
-                            publication = pub,
+                            publication = publication,
                             userRole = "user",
+                            isOwner = publication.id_usuario == userId.toInt(),
                             onClickNav = onClickNav,
-                            onSave = { profileViewModel.toggleSave(pub) },
-                            onLike = { profileViewModel.toggleLike(pub) },
-                            onDelete = {}
+                            onSave = { profileViewModel.toggleSave(publication) },
+                            onLike = { profileViewModel.toggleLike(publication) },
+                            onDelete = {profileViewModel.deletePublication(publication.id)}
                         )
                     }
                     item(span = StaggeredGridItemSpan.FullLine) {

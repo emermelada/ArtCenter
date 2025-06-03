@@ -28,6 +28,7 @@ fun SearchPublicationsScreen(
     mainScaffoldViewModel: MainScaffoldViewModel = hiltViewModel()
 ) {
     val userRole by mainScaffoldViewModel.userRol.collectAsState()
+    val userId by mainScaffoldViewModel.userId.collectAsState()
 
     val publications by viewModel.publications.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -85,10 +86,11 @@ fun SearchPublicationsScreen(
                     PublicationItem(
                         publication = publication,
                         userRole = userRole,
+                        isOwner = publication.id_usuario == userId.toInt(),
                         onClickNav = onClickNav,
                         onSave = { viewModel.toggleSave(publication) },
                         onLike = { viewModel.toggleLike(publication) },
-                        onDelete = { /* opcional */ }
+                        onDelete = { viewModel.deletePublication(publication.id) }
                     )
                 }
 

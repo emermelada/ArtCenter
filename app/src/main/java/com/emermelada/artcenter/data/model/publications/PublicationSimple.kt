@@ -8,5 +8,6 @@ data class PublicationSimple(
     val id_categoria: Int,
     val id_subcategoria: Int?,
     val liked: Boolean,
-    val saved: Boolean
+    val saved: Boolean,
+    val id_usuario: Int
 )

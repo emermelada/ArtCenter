@@ -51,6 +51,7 @@ import java.util.Locale
 fun PublicationItem(
     publication: PublicationSimple,
     userRole: String,
+    isOwner: Boolean,
     onClickNav: (String) -> Unit,
     onSave: () -> Unit,
     onLike: () -> Unit,
@@ -138,7 +139,7 @@ fun PublicationItem(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false }
                     ) {
-                        if (userRole != "admin") {
+                        if (userRole != "admin" && !isOwner) {
                             // Toggle guardar
                             DropdownMenuItem(
                                 text = {
@@ -181,7 +182,61 @@ fun PublicationItem(
                                     )
                                 }
                             )
-                        } else {
+                        } else if(userRole != "admin" ){
+                            // Toggle guardar
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        if (publication.saved) "Guardado" else "Guardar",
+                                        color = Color.White
+                                    )
+                                },
+                                onClick = {
+                                    onSave()
+                                    menuExpanded = false
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = if (publication.saved)
+                                            Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                        contentDescription = null,
+                                        tint = Color.White
+                                    )
+                                }
+                            )
+                            // Toggle like
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        if (publication.liked) "Quitar like" else "Me gusta",
+                                        color = Color.White
+                                    )
+                                },
+                                onClick = {
+                                    onLike()
+                                    menuExpanded = false
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = if (publication.liked)
+                                            Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                        contentDescription = null,
+                                        tint = Color.White
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Eliminar", color = Color.White) },
+                                onClick = {
+                                    onDelete()
+                                    menuExpanded = false
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color.White)
+                                }
+                            )
+                        }
+                        else {
                             DropdownMenuItem(
                                 text = { Text("Eliminar", color = Color.White) },
                                 onClick = {

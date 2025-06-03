@@ -45,6 +45,8 @@ fun FeedScreen(
     feedViewModel: FeedViewModel = hiltViewModel()
 ) {
     val userRole by mainScaffoldViewModel.userRol.collectAsState()
+    val userId by mainScaffoldViewModel.userId.collectAsState()
+
     val publications by feedViewModel.publications.collectAsState()
     val isLoading by feedViewModel.isLoading.collectAsState()
 
@@ -78,10 +80,11 @@ fun FeedScreen(
                 PublicationItem(
                     publication = publication,
                     userRole = userRole,
+                    isOwner = publication.id_usuario == userId.toInt(),
                     onClickNav = onClickNav,
                     onSave = { feedViewModel.toggleSave(publication) },
                     onLike = { feedViewModel.toggleLike(publication) },
-                    onDelete = { /* … */ }
+                    onDelete = { feedViewModel.deletePublication(publication.id)}
                 )
             }
 
