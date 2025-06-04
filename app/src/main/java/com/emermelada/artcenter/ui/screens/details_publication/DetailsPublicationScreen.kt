@@ -1,6 +1,5 @@
 package com.emermelada.artcenter.ui.screens.details_publication
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +29,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.emermelada.artcenter.data.model.comments.CommentSimple
 import com.emermelada.artcenter.data.model.publications.Publication
 import com.emermelada.artcenter.ui.UiState
+import com.emermelada.artcenter.ui.components.shared.DeleteDialog
 import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.LightGray
@@ -43,6 +43,7 @@ fun DetailsPublicationScreen(
 ) {
     val context = LocalContext.current
 
+    val userId by mainScaffoldViewModel.userId.collectAsState()
     val userRole by mainScaffoldViewModel.userRol.collectAsState()
 
     val publicationState by viewModel.publicationState.collectAsState()
@@ -56,19 +57,13 @@ fun DetailsPublicationScreen(
     var newCommentText by remember { mutableStateOf("") }
     var showComments by remember { mutableStateOf(false) }
 
+    // Estado para el diálogo de confirmación
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var commentToDelete: CommentSimple? by remember { mutableStateOf(null) }
+
     LaunchedEffect(idPublicacion) {
         viewModel.loadPublication(idPublicacion)
         viewModel.loadComments(idPublicacion)
-    }
-
-    LaunchedEffect(addCommentState) {
-        if (addCommentState is UiState.Success<*>) {
-            newCommentText = ""
-            viewModel.loadComments(idPublicacion)
-        } else if (addCommentState is UiState.Error) {
-            val msg = (addCommentState as UiState.Error).message
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-        }
     }
 
     Column(
@@ -314,13 +309,23 @@ fun DetailsPublicationScreen(
                                     .weight(1f)
                             ) {
                                 items(comments) { comment ->
-                                    CommentItem(comment)
-                                    Divider(
+                                    CommentItem(
+                                        comment = comment,
+                                        userRole = userRole,
+                                        onDelete = {
+                                            // Mostrar el diálogo de confirmación
+                                            commentToDelete = comment
+                                            showDeleteDialog = true
+                                        },
+                                        userId = userId.toInt()
+                                    )
+
+                                    HorizontalDivider(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp),
-                                        color = LightGray,
-                                        thickness = 0.5.dp
+                                        thickness = 0.5.dp,
+                                        color = LightGray
                                     )
                                 }
                             }
@@ -371,6 +376,23 @@ fun DetailsPublicationScreen(
                 }
             }
         }
+    }
+
+    // Mostrar el diálogo de eliminación si está activo
+    if (showDeleteDialog && commentToDelete != null) {
+        DeleteDialog(
+            text = "¿Estás seguro de que quieres eliminar este comentario?",
+            onConfirm = {
+                // Eliminar el comentario
+                commentToDelete?.let {
+                    viewModel.deleteComment(it.id, idPublicacion)
+                }
+                showDeleteDialog = false
+            },
+            onDismiss = {
+                showDeleteDialog = false
+            }
+        )
     }
 }
 
@@ -436,12 +458,13 @@ fun PublicationDetails(
 }
 
 @Composable
-fun CommentItem(comment: CommentSimple) {
+fun CommentItem(comment: CommentSimple, userRole: String, onDelete: () -> Unit, userId: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -459,5 +482,18 @@ fun CommentItem(comment: CommentSimple) {
             style = TextStyle(fontSize = 12.sp, color = Color.Gray),
             modifier = Modifier.padding(start = 8.dp)
         )
+
+        // Mostrar botón de eliminar solo si el comentario es del usuario actual o es un admin
+        if (comment.id_usuario == userId || userRole == "admin") {
+            IconButton(onClick = { onDelete() }) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "Eliminar comentario",
+                    tint = Color.Gray
+                )
+            }
+        }
     }
 }
+
+

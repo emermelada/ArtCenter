@@ -23,7 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.emermelada.artcenter.data.model.categories.CategorySimple
 import com.emermelada.artcenter.ui.UiState
-import com.emermelada.artcenter.ui.components.categories.DeleteDialog
+import com.emermelada.artcenter.ui.components.shared.DeleteDialog
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.LightBlue

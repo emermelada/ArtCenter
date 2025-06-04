@@ -65,7 +65,6 @@ class FeedViewModel @Inject constructor(
             if (result.code in 200..299) {
                 _publications.value = _publications.value.filter { it.id != publicationId }
             }
-            // Aquí podrías manejar errores o estados si quieres
         }
     }
 }

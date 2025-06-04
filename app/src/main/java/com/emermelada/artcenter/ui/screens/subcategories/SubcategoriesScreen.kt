@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,7 +46,7 @@ import androidx.navigation.NavHostController
 import com.emermelada.artcenter.data.model.categories.Category
 import com.emermelada.artcenter.data.model.subcategories.Subcategory
 import com.emermelada.artcenter.ui.UiState
-import com.emermelada.artcenter.ui.components.categories.DeleteDialog
+import com.emermelada.artcenter.ui.components.shared.DeleteDialog
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.LoraFontFamily

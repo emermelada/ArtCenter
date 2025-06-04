@@ -1,9 +1,7 @@
-// DetailsPublicationViewModel.kt
 package com.emermelada.artcenter.ui.screens.details_publication
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emermelada.artcenter.data.model.publications.Publication
 import com.emermelada.artcenter.data.repositories.CommentRepository
 import com.emermelada.artcenter.data.repositories.PublicationRepository
 import com.emermelada.artcenter.ui.UiState
@@ -153,6 +151,21 @@ class DetailsPublicationViewModel @Inject constructor(
             } catch (_: Exception) {
                 // En caso de excepción, revertimos
                 _isSaved.value = !nextSaved
+            }
+        }
+    }
+
+    fun deleteComment(commentId: Int, publicationId: Int) {
+        viewModelScope.launch {
+            try {
+                val result = commentRepository.deleteComment(commentId)
+                if (result.code == 200) {
+                    loadComments(publicationId)
+                }else {
+                    _commentsState.value = UiState.Error(result.msg ?: "Error eliminando comentario")
+                }
+            } catch (e: Exception) {
+                _commentsState.value = UiState.Error(e.localizedMessage ?: "Error desconocido")
             }
         }
     }
