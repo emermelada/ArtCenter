@@ -28,11 +28,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,6 +60,7 @@ fun PublicationItem(
         .uppercase(Locale.getDefault())
 
     var menuExpanded by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -139,6 +138,7 @@ fun PublicationItem(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false }
                     ) {
+                        // Si no es admin y no es dueño
                         if (userRole != "admin" && !isOwner) {
                             // Toggle guardar
                             DropdownMenuItem(
@@ -228,7 +228,7 @@ fun PublicationItem(
                             DropdownMenuItem(
                                 text = { Text("Eliminar", color = Color.White) },
                                 onClick = {
-                                    onDelete()
+                                    showDeleteDialog = true
                                     menuExpanded = false
                                 },
                                 leadingIcon = {
@@ -240,7 +240,7 @@ fun PublicationItem(
                             DropdownMenuItem(
                                 text = { Text("Eliminar", color = Color.White) },
                                 onClick = {
-                                    onDelete()
+                                    showDeleteDialog = true
                                     menuExpanded = false
                                 },
                                 leadingIcon = {
@@ -252,5 +252,40 @@ fun PublicationItem(
                 }
             }
         }
+
+        // Mostrar el DeleteDialog cuando sea necesario
+        if (showDeleteDialog) {
+            DeleteDialog(
+                text = "¿Estás seguro de que deseas eliminar esta publicación?",
+                onConfirm = {
+                    onDelete()
+                    showDeleteDialog = false
+                },
+                onDismiss = { showDeleteDialog = false }
+            )
+        }
     }
+}
+
+@Composable
+fun DeleteDialog(
+    text: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text("Confirmar eliminación", color = Color.White) },
+        text = { Text(text) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Sí")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("No")
+            }
+        }
+    )
 }
