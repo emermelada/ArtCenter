@@ -10,10 +10,24 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import javax.inject.Singleton
 
+/**
+ * Repositorio responsable de las operaciones relacionadas con comentarios.
+ *
+ * Utiliza la instancia de Retrofit para realizar llamadas a la API remota y envuelve
+ * las respuestas en objetos [Result].
+ */
 @Singleton
 class CommentRepository {
     private val api = RetroFitInstance.api
 
+    /**
+     * Obtiene los comentarios asociados a una publicación específica.
+     *
+     * @param publicationId Identificador de la publicación cuyos comentarios se desean recuperar.
+     * @return Un [Result] que contiene en `data` una lista de [CommentSimple] si la llamada
+     *         fue exitosa, o `data = null` con un mensaje de error en `msg` si no lo fue. Además,
+     *         incluye el código HTTP de la respuesta.
+     */
     suspend fun getCommentsByPublication(publicationId: Int): Result<List<CommentSimple>> {
         return withContext(Dispatchers.IO) {
             val response = api.getCommentsByPublication(publicationId).execute()
@@ -34,6 +48,15 @@ class CommentRepository {
         }
     }
 
+    /**
+     * Crea un nuevo comentario en una publicación específica.
+     *
+     * @param publicationId Identificador de la publicación donde se insertará el comentario.
+     * @param contenido Texto que contendrá el comentario que el usuario desea publicar.
+     * @return Un [Result] que contiene en `data` el identificador del comentario recién creado
+     *         si la llamada fue exitosa, o `data = null` con un mensaje de error en `msg` si no lo fue.
+     *         Además, incluye el código HTTP de la respuesta.
+     */
     suspend fun createComment(publicationId: Int, contenido: String): Result<Int> {
         return withContext(Dispatchers.IO) {
             val request = CommentCreateRequest(contenido)
@@ -56,6 +79,14 @@ class CommentRepository {
         }
     }
 
+    /**
+     * Elimina un comentario específico por su identificador.
+     *
+     * @param commentId Identificador del comentario a eliminar.
+     * @return Un [Result] que contiene en `data` null y un mensaje en `msg` que indica el resultado de la eliminación
+     *         si la llamada fue exitosa, o `data = null` con un mensaje de error en `msg` si no lo fue.
+     *         Además, incluye el código HTTP de la respuesta.
+     */
     suspend fun deleteComment(commentId: Int): Result<CommentDeleteResponse> {
         return withContext(Dispatchers.IO) {
             val response = api.deleteComment(commentId).execute()

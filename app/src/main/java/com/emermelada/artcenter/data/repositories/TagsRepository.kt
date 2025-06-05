@@ -8,10 +8,23 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import javax.inject.Singleton
 
+/**
+ * Repositorio responsable de las operaciones relacionadas con etiquetas (tags).
+ *
+ * Utiliza la instancia de Retrofit para realizar llamadas a la API remota
+ * y envuelve las respuestas en objetos [Result].
+ */
 @Singleton
 class TagsRepository {
     private val api = RetroFitInstance.api
 
+    /**
+     * Obtiene todas las etiquetas disponibles en el servidor.
+     *
+     * @return Un [Result] que contiene en `data` una lista de [Tag] si la llamada fue exitosa,
+     *         o `data = null` con un mensaje de error en `msg` si no lo fue.
+     *         Además, incluye el código HTTP de la respuesta en `code`.
+     */
     suspend fun getAllTags(): Result<List<Tag>> {
         return withContext(Dispatchers.IO) {
             val response = api.getAllTags().execute()

@@ -10,11 +10,23 @@ import okhttp3.MultipartBody
 import org.json.JSONObject
 import javax.inject.Singleton
 
+/**
+ * Repositorio responsable de las operaciones relacionadas con el usuario.
+ *
+ * Utiliza la instancia de Retrofit para realizar llamadas a la API remota y envuelve
+ * las respuestas en objetos [Result].
+ */
 @Singleton
 class UserRepository {
     private val api = RetroFitInstance.api
 
-    // Obtener la información del usuario
+    /**
+     * Obtiene la información del usuario autenticado.
+     *
+     * @return Un [Result] que contiene en `data` un objeto [User] si la llamada fue exitosa,
+     *         o `data = null` con un mensaje de error en `msg` si no lo fue. Además,
+     *         incluye el código HTTP de la respuesta.
+     */
     suspend fun getUserInfo(): Result<User> {
         return withContext(Dispatchers.IO) {
             val response = api.getUserInfo().execute()
@@ -35,9 +47,15 @@ class UserRepository {
         }
     }
 
-    // Actualizar solo el nombre de usuario
+    /**
+     * Actualiza solo el nombre de usuario del usuario autenticado.
+     *
+     * @param username Nuevo nombre de usuario.
+     * @return Un [Result] con `data = null` y un mensaje (`msg`) indicando el resultado de la operación,
+     *         así como el código HTTP de la respuesta.
+     */
     suspend fun updateUsername(username: String): Result<Unit> {
-        val updateRequest = UserUpdateRequest(username = username, urlFotoPerfil = null) // Solo nombre, foto null
+        val updateRequest = UserUpdateRequest(username = username, urlFotoPerfil = null)
         return withContext(Dispatchers.IO) {
             val response = api.updateUsername(updateRequest).execute()
             if (response.isSuccessful) {
@@ -57,19 +75,23 @@ class UserRepository {
         }
     }
 
+    /**
+     * Actualiza la foto de perfil del usuario autenticado.
+     *
+     * @param file Parte multipart que contiene el archivo de imagen a subir.
+     * @return Un [Result] que contiene en `data` la URL de la nueva foto si la operación fue exitosa,
+     *         o `data = null` con un mensaje de error en `msg` si no lo fue.
+     *         En caso de éxito, el código se devuelve como 200; en caso de excepción, como 500.
+     */
     suspend fun updateProfilePicture(file: MultipartBody.Part): Result<String> {
         return try {
-            // Llamamos a la función suspendida de Retrofit que devuelve el objeto con el mensaje y la URL
-            val response = api.uploadProfilePicture(file)  // Ahora devuelve ProfilePictureResponse
-
-            // Si la solicitud es exitosa, retornamos el resultado
+            val response = api.uploadProfilePicture(file)
             Result(
-                data = response.urlFotoPerfil,  // Devolvemos la URL de la imagen
+                data = response.urlFotoPerfil,
                 msg = "Foto de perfil actualizada correctamente",
-                code = 200  // El código de éxito HTTP
+                code = 200
             )
         } catch (e: Exception) {
-            // Si ocurre un error, capturamos la excepción
             Result(
                 data = null,
                 msg = "Error al actualizar la foto: ${e.localizedMessage}",
@@ -77,5 +99,4 @@ class UserRepository {
             )
         }
     }
-
 }
