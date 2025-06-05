@@ -18,12 +18,23 @@ import com.emermelada.artcenter.ui.navigation.Destinations
 import dagger.hilt.android.AndroidEntryPoint
 import com.emermelada.artcenter.ui.theme.ArtCenterTheme
 
+/**
+ * Actividad que maneja la interfaz de autenticación de usuario.
+ *
+ * Se encarga de mostrar el flujo de pantallas de login y registro mediante navegación
+ * Compose, y dirige al usuario a MainActivity tras un login exitoso.
+ */
 @AndroidEntryPoint
 class AuthActivity : ComponentActivity() {
+
     /**
-     * Método que se ejecuta al crear la actividad.
+     * Configura el contenido de la actividad usando Jetpack Compose.
      *
-     * @param savedInstanceState Estado guardado de la actividad, si existe.
+     * Inicializa el tema de la aplicación, crea un controlador de navegación y actualiza el estado
+     * de la pantalla actual al cambiar de destino. Al hacer login, inicia MainActivity y finaliza
+     * la presente actividad.
+     *
+     * @param savedInstanceState Bundle con el estado previo de la actividad, si existe.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,9 +43,8 @@ class AuthActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                ){
+                ) {
                     val navController = rememberNavController()
-
                     val currentScreen = remember { mutableStateOf(Destinations.LOGIN) }
 
                     LaunchedEffect(navController) {
@@ -42,17 +52,20 @@ class AuthActivity : ComponentActivity() {
                             currentScreen.value = destination.route ?: Destinations.LOGIN
                         }
                     }
+
                     AuthNavGraph(
                         onClickLogIn = {
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
-                        finish()
-                    },
-                       navController,
+                            val intent = Intent(this, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        },
+                        navController = navController,
                         onClickNav = { destination ->
                             navController.navigate(destination)
-                        })
+                        }
+                    )
                 }
             }
         }
-    }}
+    }
+}

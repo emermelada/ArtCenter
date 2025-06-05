@@ -17,6 +17,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.emermelada.artcenter.R
 
+/**
+ * Composable que muestra el título de la pantalla de autenticación.
+ *
+ * Renderiza un texto centrado en la parte superior, usando la fuente personalizada "Kuchek"
+ * y los estilos definidos en el tema de Material.
+ *
+ * El texto que se muestra se obtiene de los recursos con la clave R.string.TitleAuth,
+ * y su color es el recurso R.color.black.
+ */
 @Composable
 fun Title() {
     val kuchekFont = FontFamily(Font(R.font.kuchek))
@@ -39,5 +48,3 @@ fun Title() {
         )
     }
 }
-
-

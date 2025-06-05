@@ -28,23 +28,39 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.AlertDialog
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.emermelada.artcenter.R
 import com.emermelada.artcenter.data.model.publications.PublicationSimple
+import com.emermelada.artcenter.ui.components.shared.DeleteDialog
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 import com.emermelada.artcenter.ui.theme.MutedBlue
 import java.util.Locale
 
+/**
+ * Composable que muestra un elemento de publicación con imagen, etiqueta, y opciones de interacción.
+ *
+ * @param publication Objeto [PublicationSimple] que contiene los datos básicos de la publicación.
+ * @param userRole Rol del usuario actual, utilizado para determinar opciones disponibles en el menú.
+ * @param isOwner Booleano que indica si el usuario actual es el dueño de la publicación.
+ * @param onClickNav Lambda que recibe la ruta de navegación como [String] para navegar a otra pantalla.
+ * @param onSave Lambda que se ejecuta cuando el usuario selecciona la opción de guardar o desguardar la publicación.
+ * @param onLike Lambda que se ejecuta cuando el usuario selecciona la opción de dar o quitar "like" a la publicación.
+ * @param onDelete Lambda que se ejecuta cuando el usuario confirma la eliminación de la publicación.
+ */
 @Composable
 fun PublicationItem(
     publication: PublicationSimple,
@@ -67,7 +83,6 @@ fun PublicationItem(
             .padding(8.dp)
             .fillMaxWidth()
     ) {
-        // Etiqueta encima de la Card
         if (label.isNotBlank()) {
             Text(
                 text = label,
@@ -79,7 +94,6 @@ fun PublicationItem(
                     .background(color = MutedBlue, shape = RoundedCornerShape(4.dp))
                     .border(BorderStroke(1.dp, DarkBlue), shape = RoundedCornerShape(4.dp))
                     .clickable {
-                        // navegación basada en categoría/subcategoría
                         val dest = if (publication.id_subcategoria == null)
                             "${Destinations.SUBCATEGORIES}/${publication.id_categoria}"
                         else
@@ -111,16 +125,13 @@ fun PublicationItem(
                     contentScale = ContentScale.Fit
                 )
 
-                // Tres puntitos + DropdownMenu
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(8.dp)
                 ) {
-                    // Icono “dots” hecho con 3 círculos
                     Column(
-                        modifier = Modifier
-                            .clickable { menuExpanded = true },
+                        modifier = Modifier.clickable { menuExpanded = true },
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -138,13 +149,11 @@ fun PublicationItem(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false }
                     ) {
-                        // Si no es admin y no es dueño
                         if (userRole != "admin" && !isOwner) {
-                            // Toggle guardar
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        if (publication.saved) "Guardado" else "Guardar",
+                                        if (publication.saved) stringResource(R.string.guardado) else stringResource(R.string.guardar),
                                         color = Color.White
                                     )
                                 },
@@ -161,11 +170,10 @@ fun PublicationItem(
                                     )
                                 }
                             )
-                            // Toggle like
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        if (publication.liked) "Quitar like" else "Me gusta",
+                                        if (publication.liked) stringResource(R.string.quitarLike) else stringResource(R.string.like),
                                         color = Color.White
                                     )
                                 },
@@ -182,12 +190,11 @@ fun PublicationItem(
                                     )
                                 }
                             )
-                        } else if(userRole != "admin" ){
-                            // Toggle guardar
+                        } else if (userRole != "admin") {
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        if (publication.saved) "Guardado" else "Guardar",
+                                        if (publication.saved) stringResource(R.string.guardado) else stringResource(R.string.guardar),
                                         color = Color.White
                                     )
                                 },
@@ -204,11 +211,10 @@ fun PublicationItem(
                                     )
                                 }
                             )
-                            // Toggle like
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        if (publication.liked) "Quitar like" else "Me gusta",
+                                        if (publication.liked) stringResource(R.string.quitarLike) else stringResource(R.string.like),
                                         color = Color.White
                                     )
                                 },
@@ -226,7 +232,7 @@ fun PublicationItem(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Eliminar", color = Color.White) },
+                                text = { Text(stringResource(R.string.eliminar), color = Color.White) },
                                 onClick = {
                                     showDeleteDialog = true
                                     menuExpanded = false
@@ -235,10 +241,9 @@ fun PublicationItem(
                                     Icon(Icons.Default.Delete, contentDescription = null, tint = Color.White)
                                 }
                             )
-                        }
-                        else {
+                        } else {
                             DropdownMenuItem(
-                                text = { Text("Eliminar", color = Color.White) },
+                                text = { Text(stringResource(R.string.eliminar), color = Color.White) },
                                 onClick = {
                                     showDeleteDialog = true
                                     menuExpanded = false
@@ -253,10 +258,9 @@ fun PublicationItem(
             }
         }
 
-        // Mostrar el DeleteDialog cuando sea necesario
         if (showDeleteDialog) {
             DeleteDialog(
-                text = "¿Estás seguro de que deseas eliminar esta publicación?",
+                text = stringResource(R.string.confirmarElimPublicacion),
                 onConfirm = {
                     onDelete()
                     showDeleteDialog = false
@@ -265,27 +269,4 @@ fun PublicationItem(
             )
         }
     }
-}
-
-@Composable
-fun DeleteDialog(
-    text: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        title = { Text("Confirmar eliminación", color = Color.White) },
-        text = { Text(text) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Sí")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("No")
-            }
-        }
-    )
 }

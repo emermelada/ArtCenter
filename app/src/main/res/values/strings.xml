@@ -2,5 +2,13 @@
     <string name="app_name">ArtCenter</string>
     <string name="TitleAuth">ARTCENTER</string>
     <string name="cerrarSesion">Cerrar sesión.</string>
-    <string name="CerrarSesion">Cerrar sesión.</string>
+    <string name="confirmarEliminación">Confirmar eliminación.</string>
+    <string name="si">Si</string>
+    <string name="no">No</string>
+    <string name="confirmarElimPublicacion">¿Estás seguro de que deseas eliminar esta publicación?</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="quitarLike">Quitar like</string>
+    <string name="like">Me gusta</string>
+    <string name="guardado">Guardado</string>
+    <string name="guardar">Guardar</string>
 </resources>
