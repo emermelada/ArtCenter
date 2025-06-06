@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.emermelada.artcenter.ui.screens.categories.CategoriesScreen
+import com.emermelada.artcenter.ui.screens.chat.ChatScreen
 import com.emermelada.artcenter.ui.screens.createcategories.CreateCategoriesScreen
 import com.emermelada.artcenter.ui.screens.createcategories.CreateSubcategoriesScreen
 import com.emermelada.artcenter.ui.screens.details_publication.DetailsPublicationScreen
@@ -143,6 +144,14 @@ fun AppNavGraph(
              */
             composable(Destinations.SEARCH) {
                 SearchPublicationsScreen(onClickNav)
+            }
+
+            /**
+             * Pantalla de chat con la IA.
+             * Sin argumentos en la ruta.
+             */
+            composable(Destinations.CHAT) {
+                ChatScreen()
             }
         }
     }
