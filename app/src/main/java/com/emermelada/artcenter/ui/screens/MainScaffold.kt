@@ -51,6 +51,7 @@ import androidx.navigation.compose.rememberNavController
 import com.emermelada.artcenter.R
 import com.emermelada.artcenter.ui.navigation.AppNavGraph
 import com.emermelada.artcenter.ui.navigation.Destinations
+import com.emermelada.artcenter.ui.theme.DarkBlue
 
 /**
  * Composable que define el Scaffold principal de la aplicación.
@@ -77,6 +78,7 @@ fun MainScaffold(
                 Destinations.FEED -> "ARTCENTER"
                 Destinations.PROFILE -> "PERFIL"
                 Destinations.CATEGORIES -> "CATEGORÍAS"
+                Destinations.CHAT -> "CHAT BOT"
                 Destinations.SEARCH -> "BUSCAR"
                 "${Destinations.CREATE_CATEGORIES}/{id}" -> "GESTIÓN CATEGORÍA"
                 "${Destinations.CREATE_SUBCATEGORIES}/{idCategoria}/{idSubcategoria}" -> "GESTIÓN SUBCATEGORÍA"
@@ -147,7 +149,8 @@ fun TopBarView(onClickSignOut: () -> Unit, currentScreentitle: String) {
                     }
                     DropdownMenu(
                         expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
+                        onDismissRequest = { menuExpanded = false },
+                        containerColor = DarkBlue
                     ) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.cerrarSesion), color = Color.White) },

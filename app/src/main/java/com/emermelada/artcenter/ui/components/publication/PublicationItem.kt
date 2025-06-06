@@ -147,7 +147,8 @@ fun PublicationItem(
 
                     DropdownMenu(
                         expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
+                        onDismissRequest = { menuExpanded = false },
+                        containerColor = DarkBlue
                     ) {
                         if (userRole != "admin" && !isOwner) {
                             DropdownMenuItem(

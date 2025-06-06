@@ -27,12 +27,12 @@ fun DeleteDialog(
         text = { Text(text) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.si))
+                Text(stringResource(R.string.si), color = Color.White)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.no))
+                Text(stringResource(R.string.no), color = Color.White)
             }
         }
     )

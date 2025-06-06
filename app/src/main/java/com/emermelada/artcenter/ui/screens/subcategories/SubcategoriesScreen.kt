@@ -49,6 +49,7 @@ import com.emermelada.artcenter.ui.UiState
 import com.emermelada.artcenter.ui.components.shared.DeleteDialog
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
+import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 import com.emermelada.artcenter.ui.theme.MutedBlue
 
@@ -106,19 +107,7 @@ fun SubcategoriesScreen(
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                        .background(Color.Gray.copy(alpha = 0.1f), shape = RoundedCornerShape(8.dp))
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = categoria.descripcion,
-                        fontSize = 16.sp,
-                        color = Color.DarkGray
-                    )
-                }
+                ExpandableSection("Descripción", categoria.descripcion)
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -233,7 +222,8 @@ fun SubcategoriesScreen(
                                 ) {
                                     DropdownMenu(
                                         expanded = menuExpanded,
-                                        onDismissRequest = { menuExpanded = false }
+                                        onDismissRequest = { menuExpanded = false },
+                                        containerColor = DarkBlue
                                     ) {
                                         DropdownMenuItem(
                                             text = { Text("Editar", color = Color.White) },  // Cambié el color a blanco

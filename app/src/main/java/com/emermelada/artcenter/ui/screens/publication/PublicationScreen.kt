@@ -149,7 +149,8 @@ fun PublicationScreen(
                     expanded = expandedTags,
                     onDismissRequest = { expandedTags = false },
                     modifier = Modifier.wrapContentWidth(), // ancho solo necesario
-                    offset = DpOffset(x = 0.dp, y = 0.dp)  // ajusta la posición justo abajo del texto
+                    offset = DpOffset(x = 0.dp, y = 0.dp),  // ajusta la posición justo abajo del texto
+                    containerColor = DarkBlue
                 ) {
                     DropdownMenuItem(
                         text = { Text("Ninguna", style = TextStyle(color = Color.White)) },

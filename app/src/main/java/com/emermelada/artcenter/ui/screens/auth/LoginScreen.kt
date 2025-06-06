@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -71,7 +72,13 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     textStyle = TextStyle(fontSize = 16.sp, color = Color.Black),
-                    label = { Text("Correo", fontSize = 15.sp, color = Color.DarkGray) }
+                    label = {
+                        Text(
+                            stringResource(R.string.label_email),
+                            fontSize = 15.sp,
+                            color = Color.DarkGray
+                        )
+                    }
                 )
 
                 // Contraseña
@@ -81,7 +88,13 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     textStyle = TextStyle(fontSize = 16.sp, color = Color.Black),
-                    label = { Text("Contraseña", fontSize = 15.sp, color = Color.DarkGray) },
+                    label = {
+                        Text(
+                            stringResource(R.string.label_password),
+                            fontSize = 15.sp,
+                            color = Color.DarkGray
+                        )
+                    },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val icon = if (passwordVisible)
@@ -117,7 +130,6 @@ fun LoginScreen(
                     }
                 }
 
-
                 // Botón iniciar sesión
                 Button(
                     onClick = {
@@ -141,7 +153,11 @@ fun LoginScreen(
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
                 ) {
-                    Text("INICIAR SESIÓN", color = Color.White, fontFamily = LoraFontFamily)
+                    Text(
+                        text = stringResource(R.string.button_login),
+                        color = Color.White,
+                        fontFamily = LoraFontFamily
+                    )
                 }
             }
 
@@ -151,16 +167,17 @@ fun LoginScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "¿Aún no tienes cuenta? ",
+                    text = stringResource(R.string.text_no_account),
                     color = Color.Black,
                     fontSize = 13.sp
                 )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "¡Regístrate aquí!",
+                    text = stringResource(R.string.text_register_here),
                     color = Color.Blue,
                     textDecoration = TextDecoration.Underline,
                     fontSize = 13.sp,
-                    modifier = Modifier.clickable { onClickNav(Destinations.REGISTER)}
+                    modifier = Modifier.clickable { onClickNav(Destinations.REGISTER) }
                 )
             }
 
@@ -182,7 +199,8 @@ fun LoginScreen(
                         intentoLogin = false
                         errorMessage = (uiStateLogin as UiState.Error).message
                     }
-                    else -> { }
+
+                    else -> { /* no-op */ }
                 }
             }
         }

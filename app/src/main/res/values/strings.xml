@@ -11,4 +11,24 @@
     <string name="like">Me gusta</string>
     <string name="guardado">Guardado</string>
     <string name="guardar">Guardar</string>
+    <!-- Etiquetas de los campos -->
+    <string name="label_email">Correo</string>
+    <string name="label_password">Contraseña</string>
+
+    <!-- Texto del botón -->
+    <string name="button_login">INICIAR SESIÓN</string>
+
+    <!-- Enlace para registrarse -->
+    <string name="text_no_account">¿Aún no tienes cuenta?</string>
+    <string name="text_register_here">¡Regístrate aquí!</string>
+    <!-- Etiquetas de los campos -->
+    <string name="label_username">Username</string>
+    <string name="label_repeat_password">Repetir contraseña</string>
+
+    <!-- Texto del botón -->
+    <string name="button_register">REGISTRAR</string>
+
+    <!-- Enlace para iniciar sesión -->
+    <string name="text_already_have_account">¿Ya tienes una cuenta?</string>
+    <string name="text_login_here">¡Inicia sesión aquí!</string>
 </resources>

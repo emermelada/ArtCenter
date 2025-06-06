@@ -1,39 +1,51 @@
 package com.emermelada.artcenter.ui.screens.details_publication
 
 import androidx.compose.foundation.Image
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.layout.ContentScale
 import coil.compose.rememberAsyncImagePainter
 import com.emermelada.artcenter.data.model.comments.CommentSimple
-import com.emermelada.artcenter.data.model.publications.Publication
 import com.emermelada.artcenter.ui.UiState
-import com.emermelada.artcenter.ui.components.shared.DeleteDialog
-import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.LightGray
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.ui.draw.clip
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.emermelada.artcenter.data.model.publications.Publication
+import com.emermelada.artcenter.ui.components.shared.DeleteDialog
+import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsPublicationScreen(
     idPublicacion: Int,
@@ -41,9 +53,8 @@ fun DetailsPublicationScreen(
     mainScaffoldViewModel: MainScaffoldViewModel = hiltViewModel(),
     viewModel: DetailsPublicationViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-
     val userId by mainScaffoldViewModel.userId.collectAsState()
+    val userIdInt = userId.toIntOrNull() ?: -1
     val userRole by mainScaffoldViewModel.userRol.collectAsState()
 
     val publicationState by viewModel.publicationState.collectAsState()
@@ -60,6 +71,15 @@ fun DetailsPublicationScreen(
     // Estado para el diálogo de confirmación
     var showDeleteDialog by remember { mutableStateOf(false) }
     var commentToDelete: CommentSimple? by remember { mutableStateOf(null) }
+
+
+    // Cada vez que cambia el estado de adicionar comentario, si es éxito, vaciar campo y recargar comentarios
+    LaunchedEffect(addCommentState) {
+        if (addCommentState is UiState.Success<*>) {
+            newCommentText = ""
+            viewModel.loadComments(idPublicacion)
+        }
+    }
 
     LaunchedEffect(idPublicacion) {
         viewModel.loadPublication(idPublicacion)
@@ -238,28 +258,36 @@ fun DetailsPublicationScreen(
 
     // Overlay de comentarios
     if (showComments) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0x88000000))
-                .clickable { showComments = false }
+        // Creamos el estado sin initialValue explícito:
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+
+        // Abrir el sheet apenas showComments pase a true
+        LaunchedEffect(showComments) {
+            if (showComments) {
+                sheetState.show()
+            }
+        }
+
+        ModalBottomSheet(
+            onDismissRequest = {
+                // Si se toca fuera o back, cierra
+                showComments = false
+            },
+            sheetState = sheetState,
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            tonalElevation = 8.dp,
+            containerColor = Color.White,
+            scrimColor = Color(0x88000000) // fondo semitransparente idéntico al que tenías
         ) {
+            // Este Column es exactamente tu contenido de comentarios:
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.75f)
-                    .align(Alignment.BottomCenter)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    .background(Color.White)
+                    .fillMaxHeight(0.7f)
                     .padding(16.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(4.dp)
-                        .background(Color.LightGray, RoundedCornerShape(2.dp))
-                        .align(Alignment.CenterHorizontally)
-                )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "Comentarios",
@@ -271,6 +299,7 @@ fun DetailsPublicationScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Aquí va tu when(commentsState) { … } con LazyColumn de Comentarios
                 when (commentsState) {
                     is UiState.Loading -> {
                         Box(
@@ -313,19 +342,17 @@ fun DetailsPublicationScreen(
                                         comment = comment,
                                         userRole = userRole,
                                         onDelete = {
-                                            // Mostrar el diálogo de confirmación
                                             commentToDelete = comment
                                             showDeleteDialog = true
                                         },
-                                        userId = userId.toInt()
+                                        userId = userIdInt
                                     )
-
-                                    HorizontalDivider(
+                                    Divider(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp),
-                                        thickness = 0.5.dp,
-                                        color = LightGray
+                                        color = LightGray,
+                                        thickness = 0.5.dp
                                     )
                                 }
                             }
@@ -336,7 +363,7 @@ fun DetailsPublicationScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo para añadir comentario solo si NO es admin
+                // Campo para añadir comentario (si no es admin):
                 if (userRole != "admin") {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -378,12 +405,13 @@ fun DetailsPublicationScreen(
         }
     }
 
-    // Mostrar el diálogo de eliminación si está activo
+    // —————————————————————————————————
+    // El diálogo de eliminación de comentario
+    // —————————————————————————————————
     if (showDeleteDialog && commentToDelete != null) {
         DeleteDialog(
             text = "¿Estás seguro de que quieres eliminar este comentario?",
             onConfirm = {
-                // Eliminar el comentario
                 commentToDelete?.let {
                     viewModel.deleteComment(it.id, idPublicacion)
                 }
@@ -495,5 +523,3 @@ fun CommentItem(comment: CommentSimple, userRole: String, onDelete: () -> Unit, 
         }
     }
 }
-
-

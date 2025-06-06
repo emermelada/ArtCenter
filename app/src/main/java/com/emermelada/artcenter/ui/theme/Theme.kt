@@ -58,25 +58,18 @@ val onSecondary = Color.White
 
 /**
  * Color de contenido que se mostrará sobre el fondo.
+ * → Cambiado a DarkBlue para que los desplegables no salgan en negro.
  */
-val onBackground = Color.Black
+val onBackground = DarkBlue
 
 /**
  * Color de contenido que se mostrará sobre la superficie.
+ * → Cambiado a DarkBlue para que los menús emergentes (Popups) usen azul oscuro.
  */
-val onSurface = Color.DarkGray
+val onSurface = DarkBlue
 
 /**
  * Esquema de colores para tema oscuro.
- *
- * @property primary Color principal del tema.
- * @property secondary Color secundario del tema.
- * @property background Color de fondo.
- * @property surface Color de superficie.
- * @property onPrimary Color de contenido sobre el elemento primario.
- * @property onSecondary Color de contenido sobre el elemento secundario.
- * @property onBackground Color de contenido sobre el fondo.
- * @property onSurface Color de contenido sobre la superficie.
  */
 private val DarkColorScheme = darkColorScheme(
     primary = DarkBlue,
@@ -85,21 +78,12 @@ private val DarkColorScheme = darkColorScheme(
     surface = surface,
     onPrimary = onPrimary,
     onSecondary = onSecondary,
-    onBackground = onBackground,
-    onSurface = onSurface
+    onBackground = onBackground, // ahora DarkBlue en lugar de Color.Black
+    onSurface = onSurface        // ahora DarkBlue en lugar de Color.DarkGray
 )
 
 /**
  * Esquema de colores para tema claro.
- *
- * @property primary Color principal del tema.
- * @property secondary Color secundario del tema.
- * @property background Color de fondo.
- * @property surface Color de superficie.
- * @property onPrimary Color de contenido sobre el elemento primario.
- * @property onSecondary Color de contenido sobre el elemento secundario.
- * @property onBackground Color de contenido sobre el fondo.
- * @property onSurface Color de contenido sobre la superficie.
  */
 private val LightColorScheme = lightColorScheme(
     primary = DarkBlue,
@@ -108,17 +92,10 @@ private val LightColorScheme = lightColorScheme(
     surface = surface,
     onPrimary = onPrimary,
     onSecondary = onSecondary,
-    onBackground = onBackground,
-    onSurface = onSurface
+    onBackground = onBackground, // → DarkBlue
+    onSurface = onSurface        // → DarkBlue
 )
 
-/**
- * Aplica el tema ArtCenter a la interfaz de usuario.
- *
- * @param darkTheme Indica si se debe usar el esquema de colores oscuro. Por defecto, se obtiene del sistema.
- * @param dynamicColor Indica si se deben usar colores dinámicos en Android 12 o superior.
- * @param content Contenido de la interfaz que usará el tema aplicado.
- */
 @Composable
 fun ArtCenterTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -128,7 +105,8 @@ fun ArtCenterTheme(
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme) dynamicDarkColorScheme(context)
+            else dynamicLightColorScheme(context)
         }
         darkTheme -> DarkColorScheme
         else -> LightColorScheme

@@ -26,6 +26,7 @@ import com.emermelada.artcenter.ui.UiState
 import com.emermelada.artcenter.ui.components.shared.DeleteDialog
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
+import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.LightBlue
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 import com.emermelada.artcenter.ui.theme.MutedBlue
@@ -164,7 +165,8 @@ fun CategoriesScreen(
                                 ) {
                                     DropdownMenu(
                                         expanded = menuExpanded,
-                                        onDismissRequest = { menuExpanded = false }
+                                        onDismissRequest = { menuExpanded = false },
+                                        containerColor = DarkBlue
                                     ) {
                                         DropdownMenuItem(
                                             text = { Text("Editar", color = Color.White) },

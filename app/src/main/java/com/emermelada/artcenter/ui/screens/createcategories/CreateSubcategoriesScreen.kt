@@ -2,7 +2,9 @@ package com.emermelada.artcenter.ui.screens.createcategories
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.emermelada.artcenter.data.model.categories.CategorySimple
 import com.emermelada.artcenter.ui.UiState
 import com.emermelada.artcenter.ui.navigation.Destinations
+import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 
 @Composable
@@ -83,9 +86,10 @@ fun CreateSubcategoriesScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
             modifier = Modifier
@@ -138,7 +142,8 @@ fun CreateSubcategoriesScreen(
                                     DropdownMenu(
                                         expanded = expanded.value,
                                         onDismissRequest = { expanded.value = false },
-                                        modifier = Modifier.wrapContentSize()
+                                        modifier = Modifier.wrapContentSize(),
+                                        containerColor = DarkBlue
                                     ) {
                                         categories.forEach { category ->
                                             DropdownMenuItem(
