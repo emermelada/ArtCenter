@@ -31,6 +31,17 @@ import com.emermelada.artcenter.ui.theme.LightBlue
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 import com.emermelada.artcenter.ui.theme.MutedBlue
 
+/**
+ * Pantalla que muestra la lista de categorías disponibles.
+ *
+ * Permite navegar a las subcategorías de cada categoría y, para usuarios con rol de administrador,
+ * editar o eliminar categorías, así como añadir nuevas categorías o subcategorías.
+ *
+ * @param onClickNav Lambda que recibe la ruta de navegación para acciones de creación.
+ * @param navController Controlador de navegación para mover al usuario entre pantallas.
+ * @param viewModel Instancia de [MainScaffoldViewModel] que proporciona el rol de usuario.
+ * @param categoriesViewModel Instancia de [CategoriesViewModel] que gestiona la lógica de categorías.
+ */
 @Composable
 fun CategoriesScreen(
     onClickNav: (String) -> Unit,
@@ -41,8 +52,6 @@ fun CategoriesScreen(
     val userRole by viewModel.userRol.collectAsState()
     val categoriesState by categoriesViewModel.categoriesState.collectAsState()
     var selectedCategoryName by remember { mutableStateOf("Categorías") }
-
-    // Estado para la categoría que queremos eliminar
     var categoryToDelete by remember { mutableStateOf<CategorySimple?>(null) }
 
     LaunchedEffect(Unit) {
@@ -60,7 +69,6 @@ fun CategoriesScreen(
             is UiState.Loading -> {
                 CircularProgressIndicator()
             }
-
             is UiState.Error -> {
                 Text(
                     text = (categoriesState as UiState.Error).message,
@@ -68,24 +76,25 @@ fun CategoriesScreen(
                     fontSize = 14.sp
                 )
             }
-
             is UiState.Success<*> -> {
                 val categorias = (categoriesState as UiState.Success<List<CategorySimple>>).data
 
                 LazyColumn(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
                         .fillMaxWidth(),
                     contentPadding = PaddingValues(top = 15.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(categorias) { index, category ->
+                    itemsIndexed(categorias) { _, category ->
                         var menuExpanded by remember { mutableStateOf(false) }
 
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp) // Padding inferior
-                            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp)) // Sombra solo en la parte inferior
-                            .clip(RoundedCornerShape(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 4.dp)
+                                .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(16.dp))
                         ) {
                             Row(
                                 modifier = Modifier
@@ -156,12 +165,11 @@ fun CategoriesScreen(
                                 }
                             }
 
-                            // Desplegable del menú que aparece a la derecha, debajo del icono
                             if (menuExpanded) {
                                 Box(
                                     modifier = Modifier
-                                        .align(Alignment.TopEnd) // Alineación a la derecha
-                                        .offset(x = (-100).dp, y = 65.dp)  // Ajusta el menú para que aparezca justo debajo
+                                        .align(Alignment.TopEnd)
+                                        .offset(x = (-100).dp, y = 65.dp)
                                 ) {
                                     DropdownMenu(
                                         expanded = menuExpanded,
@@ -189,10 +197,9 @@ fun CategoriesScreen(
                     }
                 }
             }
-            else -> {  }
+            else -> { /* No-op */ }
         }
 
-        // Diálogo de confirmación, solo si categoryToDelete no es null
         categoryToDelete?.let { category ->
             DeleteDialog(
                 text = "¿Seguro que quieres eliminar la categoría ${category.nombre}?",

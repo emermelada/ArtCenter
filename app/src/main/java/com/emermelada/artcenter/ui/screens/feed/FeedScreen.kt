@@ -1,7 +1,6 @@
 package com.emermelada.artcenter.ui.screens.feed
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -38,6 +37,16 @@ import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.Yellow
 
+/**
+ * Composable que muestra el feed de publicaciones en un grid escalonado.
+ *
+ * Carga publicaciones paginadas al desplazarse hasta el final de la lista.
+ * Para usuarios no administradores, muestra un botón flotante para crear nueva publicación.
+ *
+ * @param onClickNav Lambda que recibe la ruta de navegación cuando se interactúa con elementos.
+ * @param mainScaffoldViewModel ViewModel que provee información de usuario (rol e identificador).
+ * @param feedViewModel ViewModel que maneja la carga, paginación y acciones sobre las publicaciones.
+ */
 @Composable
 fun FeedScreen(
     onClickNav: (String) -> Unit,
@@ -46,27 +55,26 @@ fun FeedScreen(
 ) {
     val userRole by mainScaffoldViewModel.userRol.collectAsState()
     val userId by mainScaffoldViewModel.userId.collectAsState()
-
     val userIdInt = userId.toIntOrNull() ?: -1
 
     val publications by feedViewModel.publications.collectAsState()
     val isLoading by feedViewModel.isLoading.collectAsState()
 
     val gridState = rememberLazyStaggeredGridState()
-    val page = remember { mutableStateOf(0) }
+    val page = remember { mutableIntStateOf(0) }
 
     LaunchedEffect(gridState) {
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .collect { lastIndex ->
                 if (lastIndex == publications.size - 1 && !isLoading) {
-                    page.value++
-                    feedViewModel.loadPublications(page.value)
+                    page.intValue++
+                    feedViewModel.loadPublications(page.intValue)
                 }
             }
     }
 
     LaunchedEffect(Unit) {
-        feedViewModel.loadPublications(page.value)
+        feedViewModel.loadPublications(page.intValue)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -86,7 +94,7 @@ fun FeedScreen(
                     onClickNav = onClickNav,
                     onSave = { feedViewModel.toggleSave(publication) },
                     onLike = { feedViewModel.toggleLike(publication) },
-                    onDelete = { feedViewModel.deletePublication(publication.id)}
+                    onDelete = { feedViewModel.deletePublication(publication.id) }
                 )
             }
 
@@ -106,21 +114,15 @@ fun FeedScreen(
             FloatingActionButton(
                 onClick = { onClickNav(Destinations.PUBLICATION) },
                 shape = CircleShape,
-                containerColor = Yellow,                     // fondo amarillo
-                contentColor = DarkBlue,                     // icono en azul oscuro
+                containerColor = Yellow,
+                contentColor = DarkBlue,
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
                 modifier = Modifier
                     .padding(16.dp)
                     .align(Alignment.BottomEnd)
-                    .border(
-                        BorderStroke(2.dp, DarkBlue),
-                        shape = CircleShape
-                    )
+                    .border(BorderStroke(2.dp, DarkBlue), shape = CircleShape)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Añadir"
-                )
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Añadir")
             }
         }
     }

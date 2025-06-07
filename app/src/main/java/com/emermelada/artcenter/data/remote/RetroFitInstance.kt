@@ -17,7 +17,7 @@ object RetroFitInstance {
     /**
      * URL base para todas las peticiones a la API de ArtCenter.
      */
-    private const val BASE_URL = "http://192.168.1.65:5000/api/"
+    private const val BASE_URL = "/api/"
 
     /**
      * Cliente HTTP de OkHttp configurado sin cabeceras de autenticación.

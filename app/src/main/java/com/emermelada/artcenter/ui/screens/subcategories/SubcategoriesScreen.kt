@@ -1,7 +1,6 @@
 package com.emermelada.artcenter.ui.screens.subcategories
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,7 +51,20 @@ import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 import com.emermelada.artcenter.ui.theme.MutedBlue
-
+/**
+ * Muestra las subcategorías de una categoría determinada.
+ *
+ * - Carga la información de la categoría y sus subcategorías al iniciarse.
+ * - Permite volver al listado de categorías.
+ * - Para usuarios con rol "admin", ofrece botones para editar y eliminar cada subcategoría.
+ * - Para usuarios regulares, permite navegar a la vista de detalles de la subcategoría.
+ * - Al eliminar, solicita confirmación mediante un diálogo.
+ *
+ * @param categoriaId Identificador de la categoría cuyas subcategorías se muestran.
+ * @param navController Controlador de navegación para cambiar de pantalla.
+ * @param viewModel ViewModel principal que provee el rol de usuario.
+ * @param subcategoriesViewModel ViewModel que gestiona la carga, creación, actualización y eliminación de subcategorías.
+ */
 @Composable
 fun SubcategoriesScreen(
     categoriaId: Int,
@@ -79,10 +91,9 @@ fun SubcategoriesScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         when (categoriesState) {
-            is UiState.Loading -> { /* Opcional: mostrar loader */ }
+            is UiState.Loading -> { }
             is UiState.Success<*> -> {
                 val categoria = (categoriesState as UiState.Success<Category>).data
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -94,7 +105,6 @@ fun SubcategoriesScreen(
                         fontSize = 20.sp,
                         color = Color.DarkGray
                     )
-
                     IconButton(
                         onClick = { navController.navigate(Destinations.CATEGORIES) },
                         modifier = Modifier.align(Alignment.CenterStart)
@@ -106,13 +116,15 @@ fun SubcategoriesScreen(
                         )
                     }
                 }
-
                 ExpandableSection("Descripción", categoria.descripcion)
-
                 Spacer(modifier = Modifier.height(16.dp))
             }
             is UiState.Error -> {
-                Text(text = (categoriesState as UiState.Error).message, color = Color.Red)
+                Text(
+                    text = (categoriesState as UiState.Error).message,
+                    color = Color.Red,
+                    fontSize = 14.sp
+                )
             }
             else -> {}
         }
@@ -130,21 +142,18 @@ fun SubcategoriesScreen(
             }
             is UiState.Success<*> -> {
                 val subcategorias = (subcategoriesState as UiState.Success<List<Subcategory>>).data
-
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    itemsIndexed(subcategorias) { index, subcategory ->
+                    itemsIndexed(subcategorias) { _, subcategory ->
                         var menuExpanded by remember { mutableStateOf(false) }
-
                         val pastelColor = Color(0xFF3E8A95)
-
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 4.dp) // Padding inferior
-                                .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp)) // Sombra solo en la parte inferior
+                                .padding(bottom = 4.dp)
+                                .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
                                 .clip(RoundedCornerShape(16.dp))
                         ) {
                             Row(
@@ -156,7 +165,9 @@ fun SubcategoriesScreen(
                                 if (userRole == "admin") {
                                     Button(
                                         onClick = {
-                                            navController.navigate("${Destinations.SUBCATEGORY}/${categoriaId}/${subcategory.id_subcategoria}")
+                                            navController.navigate(
+                                                "${Destinations.SUBCATEGORY}/$categoriaId/${subcategory.id_subcategoria}"
+                                            )
                                         },
                                         modifier = Modifier
                                             .weight(1f)
@@ -182,7 +193,7 @@ fun SubcategoriesScreen(
                                                 modifier = Modifier.padding(start = 8.dp)
                                             ) {
                                                 Icon(
-                                                    Icons.Default.Edit,
+                                                    Icons.Filled.Edit,
                                                     contentDescription = "Opciones Subcategoría",
                                                     tint = Color.White
                                                 )
@@ -192,7 +203,9 @@ fun SubcategoriesScreen(
                                 } else {
                                     Button(
                                         onClick = {
-                                            navController.navigate("${Destinations.SUBCATEGORY}/${categoriaId}/${subcategory.id_subcategoria}")
+                                            navController.navigate(
+                                                "${Destinations.SUBCATEGORY}/$categoriaId/${subcategory.id_subcategoria}"
+                                            )
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -226,14 +239,16 @@ fun SubcategoriesScreen(
                                         containerColor = DarkBlue
                                     ) {
                                         DropdownMenuItem(
-                                            text = { Text("Editar", color = Color.White) },  // Cambié el color a blanco
+                                            text = { Text("Editar", color = Color.White) },
                                             onClick = {
                                                 menuExpanded = false
-                                                navController.navigate("${Destinations.CREATE_SUBCATEGORIES}/${categoriaId}/${subcategory.id_subcategoria}")
+                                                navController.navigate(
+                                                    "${Destinations.CREATE_SUBCATEGORIES}/$categoriaId/${subcategory.id_subcategoria}"
+                                                )
                                             }
                                         )
                                         DropdownMenuItem(
-                                            text = { Text("Eliminar", color = Color.White) },  // Cambié el color a blanco
+                                            text = { Text("Eliminar", color = Color.White) },
                                             onClick = {
                                                 menuExpanded = false
                                                 subcategoryToDelete = subcategory

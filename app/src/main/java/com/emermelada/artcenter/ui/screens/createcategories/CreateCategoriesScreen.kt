@@ -6,7 +6,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +20,18 @@ import com.emermelada.artcenter.ui.UiState
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 
+/**
+ * Composable que muestra la pantalla de creación o edición de una categoría.
+ *
+ * - Si [id] es distinto de 0, carga la categoría existente y rellena los campos.
+ * - Permite introducir nombre y descripción.
+ * - Muestra mensajes de éxito o error según el estado de [viewModel].
+ * - Guarda o actualiza la categoría al pulsar el botón "Guardar".
+ *
+ * @param id Identificador de la categoría (0 para crear nueva, distinto de 0 para editar existente).
+ * @param onClickNav Lambda que recibe la ruta de navegación al volver al listado de categorías.
+ * @param viewModel Instancia de [CreateCategoryViewModel] que gestiona la lógica de creación/actualización.
+ */
 @Composable
 fun CreateCategoriesScreen(
     id: Int,
@@ -32,21 +43,18 @@ fun CreateCategoriesScreen(
     val uiState by viewModel.uiState.collectAsState()
     val categoryState by viewModel.categoryState.collectAsState()
 
-    // Solo cargar categoría si id != 0 (editar)
     LaunchedEffect(id) {
         if (id != 0) {
             viewModel.loadCategory(id)
         }
     }
 
-    // Cuando cambia categoryState a Success, llenar campos para editar
     LaunchedEffect(categoryState) {
         if (categoryState is UiState.Success<*>) {
             val category = (categoryState as UiState.Success<Category>).data
             nombre = category.nombre
             descripcion = category.descripcion
         } else if (id == 0) {
-            // Nuevo: limpiar campos para creación
             nombre = ""
             descripcion = ""
         }
@@ -71,7 +79,6 @@ fun CreateCategoriesScreen(
                 fontSize = 20.sp,
                 color = Color.DarkGray
             )
-
             IconButton(
                 onClick = { onClickNav(Destinations.CATEGORIES) },
                 modifier = Modifier.align(Alignment.CenterStart)
@@ -118,13 +125,16 @@ fun CreateCategoriesScreen(
             }
             is UiState.Success<*> -> {
                 Text(
-                    text = if (id == 0) "Categoría creada correctamente." else "Categoría actualizada correctamente.",
+                    text = if (id == 0)
+                        "Categoría creada correctamente."
+                    else
+                        "Categoría actualizada correctamente.",
                     color = Color(0xFF4CAF50),
                     fontSize = 13.sp,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
-            else -> {  }
+            else -> { }
         }
 
         Spacer(modifier = Modifier.height(20.dp))

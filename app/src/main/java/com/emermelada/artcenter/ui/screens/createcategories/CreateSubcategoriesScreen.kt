@@ -5,10 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,19 @@ import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.theme.DarkBlue
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 
+/**
+ * Pantalla para crear o editar una subcategoría.
+ *
+ * - Si [idCategoria] e [idSubcategoria] son distintos de cero, carga la subcategoría existente y rellena los campos.
+ * - Permite seleccionar categoría (solo al crear), introducir nombre, descripción, características, requerimientos y tutoriales.
+ * - Muestra mensajes de éxito o error según el estado del [viewModel].
+ * - Guarda o actualiza la subcategoría al pulsar el botón "Guardar".
+ *
+ * @param idCategoria Identificador de la categoría a la que pertenece la subcategoría.
+ * @param idSubcategoria Identificador de la subcategoría (0 para crear nueva, distinto de 0 para editar existente).
+ * @param onClickNav Lambda que recibe la ruta de navegación al volver al listado de categorías.
+ * @param viewModel Instancia de [CreateSubcategoriesViewModel] que gestiona la lógica de creación y actualización.
+ */
 @Composable
 fun CreateSubcategoriesScreen(
     idCategoria: Int,
@@ -30,9 +42,9 @@ fun CreateSubcategoriesScreen(
     onClickNav: (String) -> Unit,
     viewModel: CreateSubcategoriesViewModel = hiltViewModel()
 ) {
-    val categoriesState = viewModel.categoriesState.collectAsState()
-    val subcategoryState = viewModel.subcategoryState.collectAsState()
-    val subcategoryLoadedState = viewModel.subcategoryLoadedState.collectAsState()
+    val categoriesState by viewModel.categoriesState.collectAsState()
+    val subcategoryState by viewModel.subcategoryState.collectAsState()
+    val subcategoryLoadedState by viewModel.subcategoryLoadedState.collectAsState()
 
     val categorySelected = remember { mutableStateOf<String?>(null) }
     var nombre by remember { mutableStateOf("") }
@@ -49,22 +61,30 @@ fun CreateSubcategoriesScreen(
         }
     }
 
-    LaunchedEffect(subcategoryLoadedState.value) {
-        val state = subcategoryLoadedState.value
-        if (state is UiState.Success<*>) {
-            val subcategory = state.data as? com.emermelada.artcenter.data.model.subcategories.Subcategory
-            if (subcategory != null) {
-                nombre = subcategory.nombre
-                descripcion = subcategory.historia ?: ""
-                caracteristicas = subcategory.caracteristicas ?: ""
-                requerimientos = subcategory.requerimientos ?: ""
-                tutoriales = subcategory.tutoriales ?: ""
-
-                val catName = (categoriesState.value as? UiState.Success<List<CategorySimple>>)
-                    ?.data?.find { it.id == subcategory.id_categoria }?.nombre
-                categorySelected.value = catName
-            } else {
-                // Si quieres, limpia los campos aquí también
+    LaunchedEffect(subcategoryLoadedState) {
+        when (val state = subcategoryLoadedState) {
+            is UiState.Success<*> -> {
+                val subcategory = state.data as? com.emermelada.artcenter.data.model.subcategories.Subcategory
+                if (subcategory != null) {
+                    nombre = subcategory.nombre
+                    descripcion = subcategory.historia.orEmpty()
+                    caracteristicas = subcategory.caracteristicas.orEmpty()
+                    requerimientos = subcategory.requerimientos.orEmpty()
+                    tutoriales = subcategory.tutoriales.orEmpty()
+                    categorySelected.value = (categoriesState as? UiState.Success<List<CategorySimple>>)
+                        ?.data
+                        ?.find { it.id == subcategory.id_categoria }
+                        ?.nombre
+                } else {
+                    nombre = ""
+                    descripcion = ""
+                    caracteristicas = ""
+                    requerimientos = ""
+                    tutoriales = ""
+                    categorySelected.value = null
+                }
+            }
+            else -> if (idSubcategoria == 0) {
                 nombre = ""
                 descripcion = ""
                 caracteristicas = ""
@@ -72,16 +92,8 @@ fun CreateSubcategoriesScreen(
                 tutoriales = ""
                 categorySelected.value = null
             }
-        } else if (idSubcategoria == 0) {
-            nombre = ""
-            descripcion = ""
-            caracteristicas = ""
-            requerimientos = ""
-            tutoriales = ""
-            categorySelected.value = null
         }
     }
-
 
     Column(
         modifier = Modifier
@@ -89,7 +101,7 @@ fun CreateSubcategoriesScreen(
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
@@ -102,7 +114,6 @@ fun CreateSubcategoriesScreen(
                 fontSize = 20.sp,
                 color = Color.DarkGray
             )
-
             IconButton(
                 onClick = { onClickNav(Destinations.CATEGORIES) },
                 modifier = Modifier.align(Alignment.CenterStart)
@@ -117,51 +128,37 @@ fun CreateSubcategoriesScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        when (val state = categoriesState.value) {
+        when (categoriesState) {
             is UiState.Success<*> -> {
-                // Sólo mostrar el dropdown de categorías si es creación (idSubcategoria == 0)
                 if (idSubcategoria == 0) {
-                    // Dropdown para seleccionar categoría
                     val expanded = remember { mutableStateOf(false) }
-                    categoriesState.value.let { state ->
-                        when (state) {
-                            is UiState.Success<*> -> {
-                                val categories = state.data as List<CategorySimple>
-                                Box(
-                                    modifier = Modifier
-                                        .wrapContentSize(Alignment.TopStart)  // Ajusta tamaño al contenido y alinea arriba a la izquierda
-                                ) {
-                                    Text(
-                                        text = categorySelected.value ?: "Selecciona una categoría",
-                                        modifier = Modifier
-                                            .clickable { expanded.value = !expanded.value }
-                                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                                        style = TextStyle(color = Color.DarkGray)
-                                    )
-
-                                    DropdownMenu(
-                                        expanded = expanded.value,
-                                        onDismissRequest = { expanded.value = false },
-                                        modifier = Modifier.wrapContentSize(),
-                                        containerColor = DarkBlue
-                                    ) {
-                                        categories.forEach { category ->
-                                            DropdownMenuItem(
-                                                text = { Text(text = category.nombre, color = Color.White) },
-                                                onClick = {
-                                                    categorySelected.value = category.nombre
-                                                    expanded.value = false
-                                                }
-                                            )
-                                        }
+                    val categories = (categoriesState as UiState.Success<List<CategorySimple>>).data
+                    Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                        Text(
+                            text = categorySelected.value ?: "Selecciona una categoría",
+                            modifier = Modifier
+                                .clickable { expanded.value = !expanded.value }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            style = TextStyle(color = Color.DarkGray)
+                        )
+                        DropdownMenu(
+                            expanded = expanded.value,
+                            onDismissRequest = { expanded.value = false },
+                            modifier = Modifier.wrapContentSize(),
+                            containerColor = DarkBlue
+                        ) {
+                            categories.forEach { category ->
+                                DropdownMenuItem(
+                                    text = { Text(text = category.nombre, color = Color.White) },
+                                    onClick = {
+                                        categorySelected.value = category.nombre
+                                        expanded.value = false
                                     }
-                                }
+                                )
                             }
-                            else -> {}
                         }
                     }
                 } else {
-                    // En edición, muestra la categoría seleccionada sin posibilidad de cambiar
                     Text(
                         text = "Categoría: ${categorySelected.value}",
                         modifier = Modifier
@@ -171,7 +168,7 @@ fun CreateSubcategoriesScreen(
                     )
                 }
             }
-            else -> {}
+            else -> { /* No-op */ }
         }
 
         OutlinedTextField(
@@ -230,8 +227,8 @@ fun CreateSubcategoriesScreen(
 
         Button(
             onClick = {
-                val categoriaSeleccionada = categorySelected.value
-                if (categoriaSeleccionada == null) {
+                val categoria = categorySelected.value
+                if (categoria == null) {
                     errorMessage.value = "Debe seleccionar una categoría."
                     return@Button
                 }
@@ -248,7 +245,7 @@ fun CreateSubcategoriesScreen(
                         caracteristicas,
                         requerimientos,
                         tutoriales,
-                        categoriaSeleccionada
+                        categoria
                     )
                 } else {
                     viewModel.updateSubcategory(
@@ -259,7 +256,7 @@ fun CreateSubcategoriesScreen(
                         caracteristicas,
                         requerimientos,
                         tutoriales,
-                        categoriaSeleccionada
+                        categoria
                     )
                 }
             },
@@ -272,7 +269,7 @@ fun CreateSubcategoriesScreen(
             Text("Guardar", color = Color.White, fontFamily = LoraFontFamily)
         }
 
-        when (val state = subcategoryState.value) {
+        when (val state = subcategoryState) {
             is UiState.Error -> {
                 Text(
                     text = state.message,
@@ -283,14 +280,16 @@ fun CreateSubcategoriesScreen(
             }
             is UiState.Success<*> -> {
                 Text(
-                    text = if (idSubcategoria == 0) "Subcategoría creada correctamente." else "Subcategoría actualizada correctamente.",
+                    text = if (idSubcategoria == 0)
+                        "Subcategoría creada correctamente."
+                    else
+                        "Subcategoría actualizada correctamente.",
                     color = Color(0xFF4CAF50),
                     fontSize = 13.sp,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
-            else -> {}
+            else -> { /* No-op */ }
         }
     }
 }
-

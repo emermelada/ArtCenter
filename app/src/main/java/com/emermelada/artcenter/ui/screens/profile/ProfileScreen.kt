@@ -8,18 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -43,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,7 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.emermelada.artcenter.data.model.profile.User
 import com.emermelada.artcenter.data.model.publications.PublicationSimple
 import com.emermelada.artcenter.ui.UiState
@@ -74,6 +64,22 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.FileOutputStream
 
+/**
+ * Pantalla de perfil de usuario que muestra y permite editar:
+ * - Foto de perfil.
+ * - Nombre de usuario.
+ * - Publicaciones propias y guardadas en pestañas.
+ *
+ * Gestiona:
+ * - Carga inicial de datos de usuario y publicaciones.
+ * - Selección y subida de una nueva foto desde la galería.
+ * - Actualización del nombre de usuario.
+ * - Paginación infinita en la vista de grid para publicaciones.
+ *
+ * @param onClickNav Lambda que maneja la navegación a otras rutas.
+ * @param profileViewModel ViewModel que gestiona los datos y acciones de perfil.
+ * @param mainScaffoldViewModel ViewModel que provee el ID y rol del usuario logueado.
+ */
 @Composable
 fun ProfileScreen(
     onClickNav: (String) -> Unit,
@@ -85,38 +91,31 @@ fun ProfileScreen(
 
     val context = LocalContext.current
     val userInfoState by profileViewModel.userInfoState.collectAsState()
-    val updateState by profileViewModel.updateState.collectAsState() // Obtener el estado de la actualización
-    var isEditing by remember { mutableStateOf(false) }  // Estado para controlar el modo de edición
-    var newUsername by remember { mutableStateOf("") }  // Estado para el nuevo nombre de usuario
-    var username by remember { mutableStateOf("") }  // Estado para el nombre de usuario actual
-    var profileImageUrl by remember { mutableStateOf<String?>(null) }  // Actualización a mutableStateOf para que sea reactivo
+    val updateState by profileViewModel.updateState.collectAsState()
+    var isEditing by remember { mutableStateOf(false) }
+    var newUsername by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var profileImageUrl by remember { mutableStateOf<String?>(null) }
 
-    // para tabs de publicaciones
     val myPublications by profileViewModel.myPublications.collectAsState()
     val savedPubs by profileViewModel.savedPublications.collectAsState()
     val isLoadingPubs by profileViewModel.isLoadingPublications.collectAsState()
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
 
-    // Lógica para seleccionar la imagen de la galería
-    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    val pickImage = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
         uri?.let { selectedUri ->
             try {
-                // Crear un archivo temporal para almacenar la imagen seleccionada
                 val inputStream = context.contentResolver.openInputStream(selectedUri)
                 val tempFile = File(context.cacheDir, "profile_temp.jpg")
                 val outputStream = FileOutputStream(tempFile)
-
-                // Copiar el contenido de la imagen a un archivo temporal
                 inputStream?.copyTo(outputStream)
-
-                // Subir la imagen al backend utilizando MultipartBody
                 val filePart = MultipartBody.Part.createFormData(
                     "file",
                     tempFile.name,
                     tempFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
                 )
-
-                // Llamada al ViewModel para actualizar la foto de perfil
                 profileViewModel.updateProfilePicture(filePart)
             } catch (e: Exception) {
                 Log.e("ProfileScreen", "Error al manejar la URI de la imagen", e)
@@ -124,46 +123,37 @@ fun ProfileScreen(
         }
     }
 
-    // cuando cambie updateState y haya un mensaje, programa que desaparezca a los 3s
     LaunchedEffect(updateState) {
         if (updateState is UiState.Success<*> || updateState is UiState.Error) {
-            kotlinx.coroutines.delay(3000)        // import kotlinx.coroutines.delay
-            profileViewModel.clearUpdateState()  // vuelve a Loading, así no se muestra nada
+            kotlinx.coroutines.delay(3000)
+            profileViewModel.clearUpdateState()
         }
     }
 
-    // load user and publications
     LaunchedEffect(Unit) {
         profileViewModel.fetchUserInfo()
         profileViewModel.loadMyPublications()
     }
 
-    // Cuando la información del usuario se obtiene, actualizamos el estado inicial del username
     LaunchedEffect(userInfoState) {
         if (userInfoState is UiState.Success<*>) {
             val user = (userInfoState as UiState.Success<User>).data
             username = user.username
-            newUsername = user.username  // Llenamos el nuevo nombre con el actual
-            profileImageUrl = user.urlFotoPerfil  // Actualizamos la URL de la foto de perfil
+            newUsername = user.username
+            profileImageUrl = user.urlFotoPerfil
         }
-    }
-
-    // Cargar la información del usuario si no se ha cargado aún
-    LaunchedEffect(Unit) {
-        profileViewModel.fetchUserInfo()
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(0.dp),  // Quitamos el padding para que ocupe todo el espacio disponible
+            .padding(0.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         when (userInfoState) {
             is UiState.Loading -> {
                 CircularProgressIndicator()
             }
-
             is UiState.Error -> {
                 Text(
                     text = (userInfoState as UiState.Error).message,
@@ -171,9 +161,7 @@ fun ProfileScreen(
                     fontSize = 14.sp
                 )
             }
-
             is UiState.Success<*> -> {
-                // Contenedor para la parte superior con fondo oscuro
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -181,12 +169,11 @@ fun ProfileScreen(
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column{
+                    Column {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // --- FOTO A LA IZQUIERDA ---
                             Box(
                                 modifier = Modifier
                                     .size(160.dp)
@@ -195,7 +182,7 @@ fun ProfileScreen(
                             ) {
                                 profileImageUrl?.let {
                                     Image(
-                                        painter = rememberImagePainter(it),
+                                        painter = rememberAsyncImagePainter(it),
                                         contentDescription = "Foto de perfil",
                                         modifier = Modifier
                                             .size(160.dp)
@@ -203,17 +190,14 @@ fun ProfileScreen(
                                             .fillMaxSize(),
                                         contentScale = ContentScale.Crop
                                     )
-                                } ?: run {
-                                    Icon(
-                                        imageVector = Icons.Filled.PhotoCamera,
-                                        contentDescription = "Editar foto",
-                                        modifier = Modifier
-                                            .clickable { pickImage.launch("image/*") }
-                                            .size(160.dp),
-                                        tint = Color.Black
-                                    )
-                                }
-                                // Ícono de editar foto
+                                } ?: Icon(
+                                    imageVector = Icons.Filled.PhotoCamera,
+                                    contentDescription = "Editar foto",
+                                    modifier = Modifier
+                                        .clickable { pickImage.launch("image/*") }
+                                        .size(160.dp),
+                                    tint = Color.Black
+                                )
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.BottomEnd)
@@ -241,80 +225,77 @@ fun ProfileScreen(
 
                             Spacer(modifier = Modifier.width(24.dp))
 
-                            // --- CONTENIDO A LA DERECHA ---
                             Column(
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.Start,
                                 modifier = Modifier.weight(1f)
                             ) {
-                                // Nombre de usuario y edición
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    if (isEditing) {
-                                        OutlinedTextField(
-                                            value = newUsername,
-                                            onValueChange = { newUsername = it },
-                                            label = { Text("Nuevo Nombre de Usuario", color = Color.DarkGray) },
-                                            singleLine = true,
-                                            modifier = Modifier.fillMaxWidth(0.7f),
-                                            textStyle = TextStyle(color = Color.DarkGray)
-                                        )
-                                        IconButton(
-                                            onClick = {
-                                                if (newUsername.isNotBlank()) {
-                                                    profileViewModel.updateUsername(newUsername)
-                                                    username = newUsername
-                                                    isEditing = false
-                                                }
-                                            }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Check,
-                                                contentDescription = "Confirmar nombre",
-                                                tint = Color.Green
-                                            )
-                                        }
-                                    } else {
-                                        Column{
+                                if (isEditing) {
+                                    OutlinedTextField(
+                                        value = newUsername,
+                                        onValueChange = { newUsername = it },
+                                        label = {
                                             Text(
-                                                text = "Nombre de usuario: ",
+                                                "Nuevo Nombre de Usuario",
+                                                color = Color.DarkGray
+                                            )
+                                        },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth(0.7f),
+                                        textStyle = TextStyle(color = Color.DarkGray)
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            if (newUsername.isNotBlank()) {
+                                                profileViewModel.updateUsername(newUsername)
+                                                username = newUsername
+                                                isEditing = false
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Check,
+                                            contentDescription = "Confirmar nombre",
+                                            tint = Color.Green
+                                        )
+                                    }
+                                } else {
+                                    Column {
+                                        Text(
+                                            text = "Nombre de usuario:",
+                                            fontSize = 18.sp,
+                                            fontFamily = LoraFontFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Row(
+                                            modifier = Modifier.padding(start = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = username,
                                                 fontSize = 18.sp,
                                                 fontFamily = LoraFontFamily,
-                                                fontWeight = FontWeight.Bold,
                                                 color = Color.Black
                                             )
-                                            Row(
-                                                modifier = Modifier.padding(start = 10.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ){
-                                                Text(
-                                                    text = username,
-                                                    fontSize = 18.sp,
-                                                    fontFamily = LoraFontFamily,
-                                                    color = Color.Black
-                                                )
-                                                IconButton(
-                                                    onClick = {
-                                                        isEditing = true
-                                                        newUsername = username
-                                                    }
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Filled.Edit,
-                                                        contentDescription = "Editar nombre de usuario",
-                                                        tint = Color.Black
-                                                    )
+                                            IconButton(
+                                                onClick = {
+                                                    isEditing = true
+                                                    newUsername = username
                                                 }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Edit,
+                                                    contentDescription = "Editar nombre de usuario",
+                                                    tint = Color.Black
+                                                )
                                             }
                                         }
                                     }
                                 }
-
                             }
                         }
-                        Row(modifier = Modifier.fillMaxWidth()){
-                            // Mensaje de éxito o error
+                        Row(modifier = Modifier.fillMaxWidth()) {
                             when (updateState) {
                                 is UiState.Success<*> -> {
                                     Text(
@@ -342,13 +323,12 @@ fun ProfileScreen(
                     thickness = 2.dp,
                     color = Color.DarkGray,
                     modifier = Modifier.shadow(
-                        elevation = 2.dp, // Ajusta la intensidad de la sombra
+                        elevation = 2.dp,
                         shape = RoundedCornerShape(4.dp),
                         clip = false
                     )
                 )
 
-                // --- TABS: Tus publicaciones / Guardados ---
                 Spacer(Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -378,7 +358,6 @@ fun ProfileScreen(
                     }
                 }
 
-                // --- GRID: publicaciones según pestaña ---
                 Spacer(Modifier.height(8.dp))
                 val gridState = rememberLazyStaggeredGridState()
                 LaunchedEffect(gridState, selectedTab) {
@@ -411,7 +390,7 @@ fun ProfileScreen(
                             onClickNav = onClickNav,
                             onSave = { profileViewModel.toggleSave(publication) },
                             onLike = { profileViewModel.toggleLike(publication) },
-                            onDelete = {profileViewModel.deletePublication(publication.id)}
+                            onDelete = { profileViewModel.deletePublication(publication.id) }
                         )
                     }
                     item(span = StaggeredGridItemSpan.FullLine) {
@@ -428,7 +407,6 @@ fun ProfileScreen(
                     }
                 }
             }
-
             else -> {}
         }
     }

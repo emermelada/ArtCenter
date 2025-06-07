@@ -1,51 +1,53 @@
 package com.emermelada.artcenter.ui.screens.details_publication
 
 import androidx.compose.foundation.Image
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.layout.ContentScale
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.emermelada.artcenter.data.model.comments.CommentSimple
-import com.emermelada.artcenter.ui.UiState
-import com.emermelada.artcenter.ui.theme.DarkBlue
-import com.emermelada.artcenter.ui.theme.LightGray
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Comment
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.ui.draw.clip
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.emermelada.artcenter.data.model.publications.Publication
+import com.emermelada.artcenter.ui.UiState
 import com.emermelada.artcenter.ui.components.shared.DeleteDialog
 import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
-
+import com.emermelada.artcenter.ui.theme.DarkBlue
+import com.emermelada.artcenter.ui.theme.LightGray
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Muestra los detalles de una publicación, permitiendo ver su contenido,
+ * marcar como favorito, guardar, y gestionar comentarios.
+ *
+ * Para usuarios normales, muestra botones de Me gusta, Guardar y Comentarios.
+ * Para administradores, solo muestra el acceso a comentarios.
+ * Incluye diálogo de confirmación para eliminar comentarios.
+ *
+ * @param idPublicacion Identificador de la publicación a cargar.
+ * @param onClickNav Lambda que maneja la navegación a otras rutas.
+ * @param mainScaffoldViewModel ViewModel que proporciona información de usuario.
+ * @param viewModel ViewModel que gestiona la lógica de detalle de publicación y comentarios.
+ */
 @Composable
 fun DetailsPublicationScreen(
     idPublicacion: Int,
@@ -68,12 +70,9 @@ fun DetailsPublicationScreen(
     var newCommentText by remember { mutableStateOf("") }
     var showComments by remember { mutableStateOf(false) }
 
-    // Estado para el diálogo de confirmación
     var showDeleteDialog by remember { mutableStateOf(false) }
     var commentToDelete: CommentSimple? by remember { mutableStateOf(null) }
 
-
-    // Cada vez que cambia el estado de adicionar comentario, si es éxito, vaciar campo y recargar comentarios
     LaunchedEffect(addCommentState) {
         if (addCommentState is UiState.Success<*>) {
             newCommentText = ""
@@ -92,7 +91,6 @@ fun DetailsPublicationScreen(
             .padding(bottom = 8.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // Encabezado con texto "Detalles" y botón de retroceso
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,7 +103,6 @@ fun DetailsPublicationScreen(
                 color = Color.DarkGray,
                 fontWeight = FontWeight.SemiBold
             )
-
             IconButton(
                 onClick = { onClickNav("FEED") },
                 modifier = Modifier.align(Alignment.CenterStart)
@@ -118,7 +115,6 @@ fun DetailsPublicationScreen(
             }
         }
 
-        // Card principal con imagen y detalles
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -140,13 +136,10 @@ fun DetailsPublicationScreen(
                                 .height(300.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(
-                                color = DarkBlue
-                            )
+                            CircularProgressIndicator(color = DarkBlue)
                         }
                     }
                     is UiState.Error -> {
-                        val msg = (publicationState as UiState.Error).message
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -154,7 +147,7 @@ fun DetailsPublicationScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = msg,
+                                text = (publicationState as UiState.Error).message,
                                 color = Color.Red,
                                 fontSize = 14.sp
                             )
@@ -164,7 +157,7 @@ fun DetailsPublicationScreen(
                         val publication = (publicationState as UiState.Success<Publication>).data
                         PublicationHeader(publication = publication)
                     }
-                    else -> { /* Idle */ }
+                    else -> { }
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -178,7 +171,6 @@ fun DetailsPublicationScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botones de Like, Guardar y Comentarios
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -195,18 +187,15 @@ fun DetailsPublicationScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (userRole == "admin") {
-                    // Solo mostrar icono de comentarios para admin (sin like ni guardar)
                     IconButton(onClick = { showComments = true }) {
                         Icon(
-                            imageVector = Icons.Filled.Comment,
+                            imageVector = Icons.AutoMirrored.Filled.Comment,
                             contentDescription = "Comentarios",
                             tint = DarkBlue,
                             modifier = Modifier.size(28.dp)
                         )
                     }
                 } else {
-                    // Usuarios normales ven Like, Guardar y Comentarios
-
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable { viewModel.toggleLike(idPublicacion) }
@@ -245,7 +234,7 @@ fun DetailsPublicationScreen(
 
                     IconButton(onClick = { showComments = true }) {
                         Icon(
-                            imageVector = Icons.Filled.Comment,
+                            imageVector = Icons.AutoMirrored.Filled.Comment,
                             contentDescription = "Comentarios",
                             tint = DarkBlue,
                             modifier = Modifier.size(28.dp)
@@ -256,32 +245,21 @@ fun DetailsPublicationScreen(
         }
     }
 
-    // Overlay de comentarios
     if (showComments) {
-        // Creamos el estado sin initialValue explícito:
-        val sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true
-        )
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-        // Abrir el sheet apenas showComments pase a true
         LaunchedEffect(showComments) {
-            if (showComments) {
-                sheetState.show()
-            }
+            if (showComments) sheetState.show()
         }
 
         ModalBottomSheet(
-            onDismissRequest = {
-                // Si se toca fuera o back, cierra
-                showComments = false
-            },
+            onDismissRequest = { showComments = false },
             sheetState = sheetState,
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             tonalElevation = 8.dp,
             containerColor = Color.White,
-            scrimColor = Color(0x88000000) // fondo semitransparente idéntico al que tenías
+            scrimColor = Color(0x88000000)
         ) {
-            // Este Column es exactamente tu contenido de comentarios:
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -291,15 +269,12 @@ fun DetailsPublicationScreen(
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "Comentarios",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        color = Color.DarkGray,
-                        fontWeight = FontWeight.Medium
-                    )
+                    fontSize = 18.sp,
+                    color = Color.DarkGray,
+                    fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Aquí va tu when(commentsState) { … } con LazyColumn de Comentarios
                 when (commentsState) {
                     is UiState.Loading -> {
                         Box(
@@ -310,13 +285,12 @@ fun DetailsPublicationScreen(
                         }
                     }
                     is UiState.Error -> {
-                        val msg = (commentsState as UiState.Error).message
                         Box(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = msg,
+                                text = (commentsState as UiState.Error).message,
                                 color = Color.Red,
                                 fontSize = 14.sp
                             )
@@ -347,23 +321,22 @@ fun DetailsPublicationScreen(
                                         },
                                         userId = userIdInt
                                     )
-                                    Divider(
+                                    HorizontalDivider(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp),
-                                        color = LightGray,
-                                        thickness = 0.5.dp
+                                        thickness = 0.5.dp,
+                                        color = LightGray
                                     )
                                 }
                             }
                         }
                     }
-                    else -> { /* Idle */ }
+                    else -> { }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo para añadir comentario (si no es admin):
                 if (userRole != "admin") {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -394,7 +367,7 @@ fun DetailsPublicationScreen(
                             enabled = newCommentText.isNotBlank() && addCommentState !is UiState.Loading
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Send,
+                                imageVector = Icons.AutoMirrored.Filled.Send,
                                 contentDescription = "Enviar Comentario",
                                 tint = DarkBlue
                             )
@@ -405,29 +378,25 @@ fun DetailsPublicationScreen(
         }
     }
 
-    // —————————————————————————————————
-    // El diálogo de eliminación de comentario
-    // —————————————————————————————————
     if (showDeleteDialog && commentToDelete != null) {
         DeleteDialog(
             text = "¿Estás seguro de que quieres eliminar este comentario?",
             onConfirm = {
-                commentToDelete?.let {
-                    viewModel.deleteComment(it.id, idPublicacion)
-                }
+                commentToDelete?.let { viewModel.deleteComment(it.id, idPublicacion) }
                 showDeleteDialog = false
             },
-            onDismiss = {
-                showDeleteDialog = false
-            }
+            onDismiss = { showDeleteDialog = false }
         )
     }
 }
 
+/**
+ * Muestra la imagen principal de una publicación.
+ *
+ * @param publication Datos de la publicación a mostrar.
+ */
 @Composable
-fun PublicationHeader(
-    publication: Publication
-) {
+fun PublicationHeader(publication: Publication) {
     Image(
         painter = rememberAsyncImagePainter(publication.urlContenido),
         contentDescription = "Contenido Publicación",
@@ -439,10 +408,13 @@ fun PublicationHeader(
     )
 }
 
+/**
+ * Muestra la descripción, etiqueta y fecha de publicación.
+ *
+ * @param publication Datos de la publicación a mostrar.
+ */
 @Composable
-fun PublicationDetails(
-    publication: Publication,
-) {
+fun PublicationDetails(publication: Publication) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -454,7 +426,8 @@ fun PublicationDetails(
         publication.descripcion?.let { desc ->
             Text(
                 text = desc,
-                style = TextStyle(fontSize = 16.sp, color = Color.DarkGray),
+                fontSize = 16.sp,
+                color = Color.DarkGray,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -468,16 +441,15 @@ fun PublicationDetails(
             publication.etiqueta?.let { tag ->
                 Text(
                     text = "#$tag",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = DarkBlue,
-                        fontWeight = FontWeight.Medium
-                    )
+                    fontSize = 14.sp,
+                    color = DarkBlue,
+                    fontWeight = FontWeight.Medium
                 )
             }
             Text(
                 text = publication.fecha_publicacion,
-                style = TextStyle(fontSize = 12.sp, color = Color.Gray)
+                fontSize = 12.sp,
+                color = Color.Gray
             )
         }
 
@@ -485,8 +457,21 @@ fun PublicationDetails(
     }
 }
 
+/**
+ * Muestra un comentario individual con posibilidad de eliminación.
+ *
+ * @param comment Datos del comentario a mostrar.
+ * @param userRole Rol del usuario actual.
+ * @param onDelete Lambda que se ejecuta al solicitar eliminación.
+ * @param userId Identificador del usuario actual.
+ */
 @Composable
-fun CommentItem(comment: CommentSimple, userRole: String, onDelete: () -> Unit, userId: Int) {
+fun CommentItem(
+    comment: CommentSimple,
+    userRole: String,
+    onDelete: () -> Unit,
+    userId: Int
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -496,22 +481,24 @@ fun CommentItem(comment: CommentSimple, userRole: String, onDelete: () -> Unit, 
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = comment.username + ": ",
-                style = TextStyle(fontSize = 14.sp, color = DarkBlue, fontWeight = FontWeight.Bold)
+                text = "${comment.username}: ",
+                fontSize = 14.sp,
+                color = DarkBlue,
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = " " + comment.contenido,
-                style = TextStyle(fontSize = 14.sp, color = Color.DarkGray)
+                text = comment.contenido,
+                fontSize = 14.sp,
+                color = Color.DarkGray
             )
         }
         Text(
             text = comment.fecha_publicacion,
-            style = TextStyle(fontSize = 12.sp, color = Color.Gray),
+            fontSize = 12.sp,
+            color = Color.Gray,
             modifier = Modifier.padding(start = 8.dp)
         )
-
-        // Mostrar botón de eliminar solo si el comentario es del usuario actual o es un admin
         if (comment.id_usuario == userId || userRole == "admin") {
             IconButton(onClick = { onDelete() }) {
                 Icon(

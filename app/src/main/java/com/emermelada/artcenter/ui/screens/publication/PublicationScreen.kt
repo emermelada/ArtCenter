@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,9 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +35,25 @@ import com.emermelada.artcenter.ui.theme.DarkBlue
 import java.io.File
 import java.io.FileOutputStream
 
+/**
+ * Pantalla para crear una nueva publicación.
+ *
+ * Muestra:
+ * 1. Selector de etiqueta con búsqueda y filtrado.
+ * 2. Selector de imagen desde la galería.
+ * 3. Campo de texto para la descripción.
+ * 4. Botón para subir la publicación.
+ *
+ * Gestiona:
+ * - Carga de etiquetas al iniciar.
+ * - Filtrado de etiquetas según la búsqueda.
+ * - Almacenamiento temporal de la imagen seleccionada.
+ * - Reseteo de campos tras una subida exitosa.
+ *
+ * @param onClickNav Lambda que recibe la ruta de navegación al pulsar el botón de retroceso.
+ * @param viewModel Instancia de [PublicationViewModel] que maneja la lógica de carga de etiquetas
+ *                  y subida de publicaciones.
+ */
 @Composable
 fun PublicationScreen(
     onClickNav: (String) -> Unit,
@@ -56,7 +72,6 @@ fun PublicationScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedTagName by remember { mutableStateOf<String?>(null) }
 
-    // Filtrado de etiquetas
     val filteredTags = remember(tagsState, searchQuery) {
         (tagsState as? UiState.Success<List<Tag>>)
             ?.data
@@ -64,11 +79,11 @@ fun PublicationScreen(
             ?: emptyList()
     }
 
-    // Selector de imagen usando ActivityResultLauncher
-    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    val pickImage = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
         uri?.let {
             selectedImageUri = it
-            // Guardar localmente para subir después
             try {
                 val inputStream = context.contentResolver.openInputStream(it)
                 val tempFile = File(context.cacheDir, "publication_temp.jpg")
@@ -81,7 +96,6 @@ fun PublicationScreen(
         }
     }
 
-    // Cargar etiquetas cuando la pantalla se inicia
     LaunchedEffect(Unit) {
         viewModel.fetchTags()
     }
@@ -99,7 +113,8 @@ fun PublicationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -113,7 +128,6 @@ fun PublicationScreen(
                 fontSize = 20.sp,
                 color = Color.DarkGray
             )
-
             IconButton(
                 onClick = { onClickNav(Destinations.FEED) },
                 modifier = Modifier.align(Alignment.CenterStart)
@@ -134,7 +148,6 @@ fun PublicationScreen(
             Text(text = "Etiqueta: ", color = Color.DarkGray)
 
             Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-                // Trigger del dropdown
                 Row(
                     modifier = Modifier
                         .clickable { expandedTags = !expandedTags }
@@ -157,11 +170,10 @@ fun PublicationScreen(
                     onDismissRequest = { expandedTags = false },
                     modifier = Modifier
                         .wrapContentWidth()
-                        .heightIn(max = 300.dp),    // límite de altura
+                        .heightIn(max = 300.dp),
                     offset = DpOffset(x = 0.dp, y = 0.dp),
                     containerColor = DarkBlue
                 ) {
-                    // Campo de búsqueda
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
@@ -173,7 +185,6 @@ fun PublicationScreen(
                         textStyle = TextStyle(color = Color.White),
                     )
 
-                    // Opción “Ninguna”
                     DropdownMenuItem(
                         text = { Text("Ninguna", style = TextStyle(color = Color.White)) },
                         onClick = {
@@ -217,7 +228,7 @@ fun PublicationScreen(
                                 }
                             }
                         }
-                        else -> { /* no-op */ }
+                        else -> { }
                     }
                 }
             }
@@ -241,7 +252,7 @@ fun PublicationScreen(
                     fontSize = 14.sp
                 )
             }
-            else -> {}
+            else -> { }
         }
 
         if (selectedImageUri != null) {
@@ -251,11 +262,11 @@ fun PublicationScreen(
                 modifier = Modifier
                     .padding(12.dp)
                     .clickable { pickImage.launch("image/*") }
-                    .heightIn(max = 350.dp)                      // altura tope
-                    .wrapContentWidth()                          // ancho según proporción
-                    .clip(RoundedCornerShape(12.dp))             // recorta la forma
-                    .border(2.dp, DarkBlue, RoundedCornerShape(12.dp)), // borde pegado
-                contentScale = ContentScale.Fit                // escala manteniendo proporción
+                    .heightIn(max = 350.dp)
+                    .wrapContentWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(2.dp, DarkBlue, RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Fit
             )
         } else {
             Spacer(modifier = Modifier.size(22.dp))
@@ -270,14 +281,15 @@ fun PublicationScreen(
             Spacer(modifier = Modifier.size(22.dp))
         }
 
-        // Descripción
         OutlinedTextField(
             value = descripcion,
             onValueChange = { descripcion = it },
-            label = { Text(
-                "Descripción.",
-                style = TextStyle(color = Color.DarkGray)
-            ) },
+            label = {
+                Text(
+                    "Descripción.",
+                    style = TextStyle(color = Color.DarkGray)
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp),
@@ -289,9 +301,7 @@ fun PublicationScreen(
 
         Button(
             onClick = {
-                if (selectedImageFile != null) {
-                    viewModel.uploadPublication(selectedImageFile!!, descripcion)
-                }
+                selectedImageFile?.let { viewModel.uploadPublication(it, descripcion) }
             },
             enabled = selectedImageFile != null,
             modifier = Modifier.fillMaxWidth(),

@@ -8,6 +8,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Composable que muestra la pantalla de chat en desarrollo.
+ *
+ * Presenta:
+ * 1. Un título indicando que el chatbot está en construcción.
+ * 2. Un indicador de progreso circular.
+ * 3. Un texto informativo para el usuario, invitándole a volver más adelante.
+ */
 @Composable
 fun ChatScreen() {
     Column(

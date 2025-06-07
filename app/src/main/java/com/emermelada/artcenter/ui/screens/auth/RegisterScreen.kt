@@ -28,22 +28,32 @@ import com.emermelada.artcenter.ui.components.auth.Title
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 
+/**
+ * Valida el correo electrónico usando el patrón estándar de Android.
+ *
+ * @param email la dirección de correo a validar.
+ * @return `true` si el correo cumple el patrón; `false` en caso contrario.
+ */
 fun isValidEmail(email: String): Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
 /**
- * Determina un color en función de la "fuerza" de la contraseña.
- * - Rojo si sólo cumple 0–2 criterios (muy débil).
- * - Amarillo si cumple 3–4 criterios (media).
- * - Verde si cumple los 5 criterios (fuerte).
+ * Determina el color que representa la fuerza de una contraseña.
  *
- * Criterios considerados:
- * 1. Longitud ≥ 8
- * 2. Al menos un dígito
- * 3. Al menos una minúscula
- * 4. Al menos una mayúscula
- * 5. Al menos un carácter especial (no letra ni dígito)
+ * Se otorga un punto por cada uno de los siguientes criterios cumplidos:
+ * 1. Longitud mínima de 8 caracteres.
+ * 2. Al menos un dígito.
+ * 3. Al menos una letra minúscula.
+ * 4. Al menos una letra mayúscula.
+ * 5. Al menos un carácter especial (no letra ni dígito).
+ *
+ * - Rojo: 0–2 puntos (muy débil).
+ * - Amarillo: 3–4 puntos (media).
+ * - Verde: 5 puntos (fuerte).
+ *
+ * @param password la contraseña a evaluar.
+ * @return un [Color] que indica la fuerza de la contraseña.
  */
 private fun passwordStrengthColor(password: String): Color {
     var puntos = 0
@@ -60,6 +70,18 @@ private fun passwordStrengthColor(password: String): Color {
     }
 }
 
+/**
+ * Composable que muestra la pantalla de registro de usuario.
+ *
+ * Incluye campos para nombre de usuario, correo, contraseña y repetición de contraseña.
+ * Muestra un indicador visual de la fuerza de la contraseña, valida la entrada y
+ * gestiona el flujo de registro mostrando un indicador de carga o mensajes de error
+ * según el estado del [RegisterViewModel].
+ *
+ * @param onClickLogIn Lambda que se ejecuta tras un registro exitoso.
+ * @param onClickNav Lambda que recibe la ruta de navegación al iniciar sesión (por ejemplo, [Destinations.LOGIN]).
+ * @param viewModel instancia de [RegisterViewModel] que contiene la lógica de registro.
+ */
 @Composable
 fun RegisterScreen(
     onClickLogIn: () -> Unit,
@@ -76,11 +98,8 @@ fun RegisterScreen(
     var errorMessage by remember { mutableStateOf("") }
     var intentoRegistro by remember { mutableStateOf(false) }
 
-    // Estado del resultado y estado de UI del ViewModel
     val registerResult by viewModel.registerResult.collectAsState()
     val uiStateRegister by viewModel.uiStateRegister.collectAsState()
-
-    // Calculamos el color del indicador de fuerza en cada recomposición
     val strengthColor = passwordStrengthColor(password)
 
     Box(
@@ -105,7 +124,6 @@ fun RegisterScreen(
                     .widthIn(max = 350.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // --- Campo: Username ---
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
@@ -121,7 +139,6 @@ fun RegisterScreen(
                     }
                 )
 
-                // --- Campo: Email ---
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -137,7 +154,6 @@ fun RegisterScreen(
                     }
                 )
 
-                // --- Campo: Contraseña ---
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -169,9 +185,6 @@ fun RegisterScreen(
                     }
                 )
 
-                // --- Indicador Visual de Fuerza de Contraseña ---
-                // Aquí mostramos un punto de 12.dp de diámetro cuyo color
-                // sale de la función passwordStrengthColor(password).
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
@@ -190,7 +203,6 @@ fun RegisterScreen(
                     )
                 }
 
-                // --- Campo: Repetir Contraseña ---
                 OutlinedTextField(
                     value = repeatPassword,
                     onValueChange = { repeatPassword = it },
@@ -224,7 +236,6 @@ fun RegisterScreen(
                     }
                 )
 
-                // --- Espacio para mensaje de error ---
                 Box(modifier = Modifier.height(32.dp)) {
                     if (errorMessage.isNotEmpty()) {
                         Text(
@@ -236,7 +247,6 @@ fun RegisterScreen(
                     }
                 }
 
-                // --- Botón: Registrar ---
                 Button(
                     onClick = {
                         when {
@@ -271,7 +281,6 @@ fun RegisterScreen(
                 }
             }
 
-            // --- Enlace para iniciar sesión ---
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
@@ -291,7 +300,6 @@ fun RegisterScreen(
                 )
             }
 
-            // --- Gestión del estado de registro (carga, éxito, error) ---
             if (intentoRegistro) {
                 when (uiStateRegister) {
                     is UiState.Loading -> {
@@ -308,7 +316,7 @@ fun RegisterScreen(
                         intentoRegistro = false
                         errorMessage = (uiStateRegister as UiState.Error).message
                     }
-                    else -> { /* no-op */ }
+                    else -> { }
                 }
             }
         }

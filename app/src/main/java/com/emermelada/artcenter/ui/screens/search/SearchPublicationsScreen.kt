@@ -21,6 +21,19 @@ import com.emermelada.artcenter.ui.screens.MainScaffoldViewModel
 import com.emermelada.artcenter.ui.theme.DarkBlue
 import kotlinx.coroutines.flow.collectLatest
 
+/**
+ * Composable que muestra la pantalla de búsqueda de publicaciones.
+ *
+ * Incluye:
+ * 1. Campo de búsqueda con icono.
+ * 2. Grid escalonado que muestra las publicaciones filtradas.
+ * 3. Paginación infinita al llegar al final del grid.
+ *
+ * @param onClickNav Lambda que recibe la ruta de navegación al interactuar con un elemento.
+ * @param viewModel ViewModel de búsqueda que expone los resultados, el estado de carga
+ *                  y las acciones de búsqueda y paginación.
+ * @param mainScaffoldViewModel ViewModel principal que provee información de usuario (rol e ID).
+ */
 @Composable
 fun SearchPublicationsScreen(
     onClickNav: (String) -> Unit,
@@ -38,7 +51,6 @@ fun SearchPublicationsScreen(
 
     val gridState = rememberLazyStaggeredGridState()
 
-    // Detectar scroll para cargar más resultados
     LaunchedEffect(gridState) {
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .collectLatest { lastIndex ->
@@ -49,7 +61,6 @@ fun SearchPublicationsScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Barra de búsqueda
         OutlinedTextField(
             value = searchText,
             onValueChange = {

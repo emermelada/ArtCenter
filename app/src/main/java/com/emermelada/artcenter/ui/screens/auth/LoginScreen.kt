@@ -27,6 +27,17 @@ import com.emermelada.artcenter.ui.components.auth.Title
 import com.emermelada.artcenter.ui.navigation.Destinations
 import com.emermelada.artcenter.ui.theme.LoraFontFamily
 
+/**
+ * Composable que muestra la pantalla de inicio de sesión.
+ *
+ * Presenta campos para introducir el correo electrónico y la contraseña, permite alternar la visibilidad
+ * de la contraseña, valida la entrada y gestiona el flujo de autenticación mostrando un indicador de carga
+ * o mensajes de error según el estado.
+ *
+ * @param onClickLogIn Lambda que se ejecuta cuando el usuario inicia sesión con éxito.
+ * @param onClickNav Lambda que recibe la ruta de navegación al registrarse (por ejemplo, [Destinations.REGISTER]).
+ * @param viewModel Instancia de [LoginViewModel] que contiene la lógica de autenticación y expone el estado UI.
+ */
 @Composable
 fun LoginScreen(
     onClickLogIn: () -> Unit,
@@ -65,7 +76,6 @@ fun LoginScreen(
                     .widthIn(max = 350.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Email
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -81,7 +91,6 @@ fun LoginScreen(
                     }
                 )
 
-                // Contraseña
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -130,7 +139,6 @@ fun LoginScreen(
                     }
                 }
 
-                // Botón iniciar sesión
                 Button(
                     onClick = {
                         when {
@@ -161,7 +169,6 @@ fun LoginScreen(
                 }
             }
 
-            // Enlace para registrarse
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
@@ -186,7 +193,6 @@ fun LoginScreen(
                     is UiState.Loading -> {
                         CircularProgressIndicator(modifier = Modifier.padding(16.dp))
                     }
-
                     is UiState.Success<*> -> {
                         loginResult?.let { isSuccess ->
                             if (isSuccess) {
@@ -194,12 +200,10 @@ fun LoginScreen(
                             }
                         }
                     }
-
                     is UiState.Error -> {
                         intentoLogin = false
                         errorMessage = (uiStateLogin as UiState.Error).message
                     }
-
                     else -> { /* no-op */ }
                 }
             }
