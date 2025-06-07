@@ -53,7 +53,16 @@ fun PublicationScreen(
     var descripcion by remember { mutableStateOf("") }
 
     var expandedTags by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     var selectedTagName by remember { mutableStateOf<String?>(null) }
+
+    // Filtrado de etiquetas
+    val filteredTags = remember(tagsState, searchQuery) {
+        (tagsState as? UiState.Success<List<Tag>>)
+            ?.data
+            ?.filter { it.nombre.contains(searchQuery, ignoreCase = true) }
+            ?: emptyList()
+    }
 
     // Selector de imagen usando ActivityResultLauncher
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -122,12 +131,10 @@ fun PublicationScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "Etiqueta: ")
+            Text(text = "Etiqueta: ", color = Color.DarkGray)
 
-            // Aquí el Box para el desplegable con texto + icono
-            Box(
-                modifier = Modifier.wrapContentSize(Alignment.TopStart)
-            ) {
+            Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                // Trigger del dropdown
                 Row(
                     modifier = Modifier
                         .clickable { expandedTags = !expandedTags }
@@ -140,7 +147,7 @@ fun PublicationScreen(
                     )
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Abrir menú desplegable",
+                        contentDescription = null,
                         tint = Color.DarkGray
                     )
                 }
@@ -148,39 +155,69 @@ fun PublicationScreen(
                 DropdownMenu(
                     expanded = expandedTags,
                     onDismissRequest = { expandedTags = false },
-                    modifier = Modifier.wrapContentWidth(), // ancho solo necesario
-                    offset = DpOffset(x = 0.dp, y = 0.dp),  // ajusta la posición justo abajo del texto
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .heightIn(max = 300.dp),    // límite de altura
+                    offset = DpOffset(x = 0.dp, y = 0.dp),
                     containerColor = DarkBlue
                 ) {
+                    // Campo de búsqueda
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("Buscar…", color = Color.LightGray) },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        textStyle = TextStyle(color = Color.White),
+                    )
+
+                    // Opción “Ninguna”
                     DropdownMenuItem(
                         text = { Text("Ninguna", style = TextStyle(color = Color.White)) },
                         onClick = {
                             selectedTagName = null
                             viewModel.selectedTagId = null
                             expandedTags = false
+                            searchQuery = ""
                         }
                     )
+
                     when (tagsState) {
-                        is UiState.Success<*> -> {
-                            val tags = (tagsState as UiState.Success<List<Tag>>).data
-                            tags.forEach { tag ->
-                                DropdownMenuItem(
-                                    text = { Text(tag.nombre, style = TextStyle(color = Color.White)) },
-                                    onClick = {
-                                        selectedTagName = tag.nombre
-                                        viewModel.selectedTagId = tag.id
-                                        expandedTags = false
-                                    }
-                                )
-                            }
-                        }
                         is UiState.Loading -> {
-                            DropdownMenuItem(text = { Text("Cargando etiquetas...") }, onClick = {})
+                            DropdownMenuItem(
+                                text = { Text("Cargando etiquetas...", color = Color.Gray) },
+                                onClick = {}
+                            )
                         }
                         is UiState.Error -> {
-                            DropdownMenuItem(text = { Text("Error cargando etiquetas") }, onClick = {})
+                            DropdownMenuItem(
+                                text = { Text("Error cargando etiquetas", color = Color.Red) },
+                                onClick = {}
+                            )
                         }
-                        else -> {}
+                        is UiState.Success<*> -> {
+                            if (filteredTags.isEmpty()) {
+                                DropdownMenuItem(
+                                    text = { Text("No hay coincidencias", color = Color.LightGray) },
+                                    onClick = {}
+                                )
+                            } else {
+                                filteredTags.forEach { tag ->
+                                    DropdownMenuItem(
+                                        text = { Text(tag.nombre, style = TextStyle(color = Color.White)) },
+                                        onClick = {
+                                            selectedTagName = tag.nombre
+                                            viewModel.selectedTagId = tag.id
+                                            expandedTags = false
+                                            searchQuery = ""
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        else -> { /* no-op */ }
                     }
                 }
             }
